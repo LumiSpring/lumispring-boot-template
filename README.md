@@ -262,7 +262,7 @@ mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS app CHARACTER SET utf8mb4;"
 mysql -u root -p app < framework-boot/framework-starter/framework-starter-security/src/main/resources/db/schema.sql
 ```
 
-脚本包含用于本地体验的默认管理员账号 `admin / admin123`。生产部署必须在首次对外启动前替换或移除该种子账号，不要留下可被利用的默认凭据。
+脚本包含仅供本地体验的种子管理员凭据。请在本地查看 `schema.sql` 了解初始值；生产部署必须在首次对外启动前替换或移除该种子账号，不要在公开文档、日志或配置中传播默认口令。
 
 ### 权限注解
 

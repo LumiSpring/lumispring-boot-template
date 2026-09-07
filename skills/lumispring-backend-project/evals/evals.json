@@ -1,0 +1,23 @@
+{
+  "skill_name": "lumispring-backend-project",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "请在空目录中创建一个名为 todo-service 的 Kotlin 后端，groupId 是 com.example.todo，包名 com.example.todo，只需要 LumiSpring 的 Web 统一响应和 Redis 能力，安全模块先不要启用。",
+      "expected_output": "A compilable standalone JDK 21 Maven project using the verified LumiSpring parent, web and Redis Starters, a Kotlin application class, a health endpoint, and security disabled without embedded secrets.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "现有 Kotlin Spring Boot 项目必须继续继承公司 parent。请通过 BOM 接入 LumiSpring 3.4.0.0，加上用户登录和 RBAC，数据库和 Redis 都通过环境变量配置，并说明初始化步骤。",
+      "expected_output": "A BOM-based integration that preserves the existing parent, uses correct import semantics and LumiSpring coordinates, enables security only with required infrastructure, and documents schema/default-account safeguards.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "我想复制整个 lumispring-boot-template，然后直接在 application 里写一个订单服务。请完成最小可运行改造并使用已有的统一响应、MyBatis-Plus 分页和 @RequireRole。",
+      "expected_output": "A clearly labeled discouraged copy-mode implementation that converts application to a runnable JAR, adds Kotlin sources and configuration, reuses framework response/database/security APIs, and validates the reactor build.",
+      "files": []
+    }
+  ]
+}
