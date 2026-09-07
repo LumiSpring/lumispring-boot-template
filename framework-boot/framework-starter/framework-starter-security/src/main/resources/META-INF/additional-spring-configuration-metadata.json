@@ -1,0 +1,202 @@
+{
+  "groups": [
+    {
+      "name": "spring.datasource.security",
+      "type": "com.zaxxer.hikari.HikariConfig",
+      "description": "Security模块独立数据源配置（用户、角色、权限表）",
+      "sourceType": "com.qinming.framework.security.config.SecurityDataSourceConfig"
+    },
+    {
+      "name": "security.redis",
+      "type": "org.springframework.boot.autoconfigure.data.redis.RedisProperties",
+      "description": "Security模块独立Redis配置，配置后将使用独立Redis连接",
+      "sourceType": "com.qinming.framework.security.config.SecurityRedisConfig"
+    }
+  ],
+  "properties": [
+    {
+      "name": "spring.datasource.security.jdbc-url",
+      "type": "java.lang.String",
+      "description": "Security模块数据库JDBC连接URL，配置后将使用独立数据源",
+      "sourceType": "com.zaxxer.hikari.HikariConfig"
+    },
+    {
+      "name": "spring.datasource.security.username",
+      "type": "java.lang.String",
+      "description": "Security模块数据库用户名",
+      "sourceType": "com.zaxxer.hikari.HikariConfig"
+    },
+    {
+      "name": "spring.datasource.security.password",
+      "type": "java.lang.String",
+      "description": "Security模块数据库密码",
+      "sourceType": "com.zaxxer.hikari.HikariConfig"
+    },
+    {
+      "name": "spring.datasource.security.driver-class-name",
+      "type": "java.lang.String",
+      "description": "数据库驱动类名，默认自动检测（MySQL: com.mysql.cj.jdbc.Driver）",
+      "defaultValue": "com.mysql.cj.jdbc.Driver",
+      "sourceType": "com.zaxxer.hikari.HikariConfig"
+    },
+    {
+      "name": "spring.datasource.security.maximum-pool-size",
+      "type": "java.lang.Integer",
+      "description": "连接池最大连接数",
+      "defaultValue": 10,
+      "sourceType": "com.zaxxer.hikari.HikariConfig"
+    },
+    {
+      "name": "spring.datasource.security.minimum-idle",
+      "type": "java.lang.Integer",
+      "description": "连接池最小空闲连接数",
+      "defaultValue": 5,
+      "sourceType": "com.zaxxer.hikari.HikariConfig"
+    },
+    {
+      "name": "spring.datasource.security.idle-timeout",
+      "type": "java.lang.Long",
+      "description": "空闲连接超时时间（毫秒），超过此时间空闲连接被释放",
+      "defaultValue": 30000,
+      "sourceType": "com.zaxxer.hikari.HikariConfig"
+    },
+    {
+      "name": "spring.datasource.security.max-lifetime",
+      "type": "java.lang.Long",
+      "description": "连接最大生命周期（毫秒），超过此时间连接会被关闭并重建",
+      "defaultValue": 1800000,
+      "sourceType": "com.zaxxer.hikari.HikariConfig"
+    },
+    {
+      "name": "spring.datasource.security.connection-timeout",
+      "type": "java.lang.Long",
+      "description": "获取连接的最大等待时间（毫秒），超时将抛出异常",
+      "defaultValue": 30000,
+      "sourceType": "com.zaxxer.hikari.HikariConfig"
+    },
+    {
+      "name": "spring.datasource.security.pool-name",
+      "type": "java.lang.String",
+      "description": "连接池名称，用于监控和日志识别",
+      "defaultValue": "SecurityHikariPool",
+      "sourceType": "com.zaxxer.hikari.HikariConfig"
+    },
+    {
+      "name": "security.redis.host",
+      "type": "java.lang.String",
+      "description": "Security模块Redis主机地址，配置后将使用独立Redis",
+      "sourceType": "com.qinming.framework.security.config.SecurityProperties"
+    },
+    {
+      "name": "security.redis.port",
+      "type": "java.lang.Integer",
+      "description": "Security模块Redis端口",
+      "defaultValue": 6379,
+      "sourceType": "com.qinming.framework.security.config.SecurityProperties"
+    },
+    {
+      "name": "security.redis.password",
+      "type": "java.lang.String",
+      "description": "Security模块Redis密码",
+      "sourceType": "com.qinming.framework.security.config.SecurityProperties"
+    },
+    {
+      "name": "security.redis.database",
+      "type": "java.lang.Integer",
+      "description": "Security模块Redis数据库索引",
+      "defaultValue": 0,
+      "sourceType": "com.qinming.framework.security.config.SecurityProperties"
+    },
+    {
+      "name": "security.redis.timeout",
+      "type": "java.time.Duration",
+      "description": "Security模块Redis连接超时时间",
+      "defaultValue": "60s",
+      "sourceType": "org.springframework.boot.autoconfigure.data.redis.RedisProperties"
+    },
+    {
+      "name": "security.redis.lettuce.pool.max-active",
+      "type": "java.lang.Integer",
+      "description": "Lettuce连接池最大活跃连接数",
+      "defaultValue": 8,
+      "sourceType": "org.springframework.boot.autoconfigure.data.redis.RedisProperties"
+    },
+    {
+      "name": "security.redis.lettuce.pool.max-idle",
+      "type": "java.lang.Integer",
+      "description": "Lettuce连接池最大空闲连接数",
+      "defaultValue": 8,
+      "sourceType": "org.springframework.boot.autoconfigure.data.redis.RedisProperties"
+    },
+    {
+      "name": "security.redis.lettuce.pool.min-idle",
+      "type": "java.lang.Integer",
+      "description": "Lettuce连接池最小空闲连接数",
+      "defaultValue": 0,
+      "sourceType": "org.springframework.boot.autoconfigure.data.redis.RedisProperties"
+    },
+    {
+      "name": "security.redis.lettuce.pool.max-wait",
+      "type": "java.time.Duration",
+      "description": "Lettuce连接池获取连接最大等待时间",
+      "defaultValue": "-1ms",
+      "sourceType": "org.springframework.boot.autoconfigure.data.redis.RedisProperties"
+    },
+    {
+      "name": "security.redis.ssl.enabled",
+      "type": "java.lang.Boolean",
+      "description": "是否启用SSL连接",
+      "defaultValue": false,
+      "sourceType": "org.springframework.boot.autoconfigure.data.redis.RedisProperties"
+    },
+    {
+      "name": "security.redis.cluster.nodes",
+      "type": "java.util.List<java.lang.String>",
+      "description": "Redis集群节点地址列表，格式：host:port",
+      "sourceType": "org.springframework.boot.autoconfigure.data.redis.RedisProperties"
+    },
+    {
+      "name": "security.redis.sentinel.master",
+      "type": "java.lang.String",
+      "description": "Redis哨兵模式主节点名称",
+      "sourceType": "org.springframework.boot.autoconfigure.data.redis.RedisProperties"
+    },
+    {
+      "name": "security.redis.sentinel.nodes",
+      "type": "java.util.List<java.lang.String>",
+      "description": "Redis哨兵节点地址列表，格式：host:port",
+      "sourceType": "org.springframework.boot.autoconfigure.data.redis.RedisProperties"
+    }
+  ],
+  "hints": [
+    {
+      "name": "spring.datasource.security.driver-class-name",
+      "values": [
+        {
+          "value": "com.mysql.cj.jdbc.Driver",
+          "description": "MySQL 8.x 驱动"
+        },
+        {
+          "value": "com.mysql.jdbc.Driver",
+          "description": "MySQL 5.x 驱动（已废弃）"
+        },
+        {
+          "value": "org.postgresql.Driver",
+          "description": "PostgreSQL 驱动"
+        },
+        {
+          "value": "com.microsoft.sqlserver.jdbc.SQLServerDriver",
+          "description": "SQL Server 驱动"
+        },
+        {
+          "value": "oracle.jdbc.OracleDriver",
+          "description": "Oracle 驱动"
+        },
+        {
+          "value": "org.mariadb.jdbc.Driver",
+          "description": "MariaDB 驱动"
+        }
+      ]
+    }
+  ]
+}

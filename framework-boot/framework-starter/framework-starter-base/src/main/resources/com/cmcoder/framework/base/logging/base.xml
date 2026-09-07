@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<included>
+    <property name="CONSOLE_LOG_PATTERN" value="%d{HH:mm:ss.SSS} [%t] %-5level %logger{15} -%m%n"/>
+    <property name="FILE_LOG_PATTERN" value="%d{HH:mm:ss.SSS} [%t] %-5level %logger{10} -%m%n"/>
+
+    <property name="LOG_FILE" value="./logs/out.log"/>
+    <!--日志滚动文件名格式-->
+    <property name="ROTATE_FILE_LOG" value="${LOG_FILE}.%d{yyyy-MM-dd}.%i.gz"/>
+    <property name="FILE_LOG_MAX_HISTORY" value="30"/>
+
+    <include resource="com/lumispring/framework/base/logging/console-appender.xml"/>
+    <include resource="com/lumispring/framework/base/logging/file-appender.xml"/>
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+    </root>
+</included>

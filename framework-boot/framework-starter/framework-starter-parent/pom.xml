@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.lumispring.framework</groupId>
+        <artifactId>framework-dependencies</artifactId>
+        <version>3.4.0.0</version>
+        <!--如果不指定，则默认是../pom.xml，但由于我们要继承dependencies项目，在上上级，所以要自己指定-->
+        <relativePath>../../framework-dependencies/pom.xml</relativePath>
+    </parent>
+
+    <artifactId>framework-starter-parent</artifactId>
+    <packaging>pom</packaging>
+
+    <build>
+        <plugins>
+<!--            配置了spring-boot-maven-plugin后打包的jar就能通过jar -r 运行-->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+    <properties>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+</project>

@@ -1,0 +1,676 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.4.0</version>
+        <relativePath />
+    </parent>
+
+    <groupId>com.lumispring.framework</groupId>
+    <artifactId>framework-dependencies</artifactId>
+    <version>3.4.0.0</version>
+
+    <packaging>pom</packaging>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <java.version>21</java.version>
+        <kotlin.version>2.1.20</kotlin.version>
+        <kotlin.compiler.languageVersion>2.1</kotlin.compiler.languageVersion>
+        <kotlin.compiler.apiVersion>2.1</kotlin.compiler.apiVersion>
+        <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
+        <kotlin.coroutine.version>1.10.1</kotlin.coroutine.version>
+        <kotlin.jackson.module.version>2.18.3</kotlin.jackson.module.version>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <framework-boot.version>3.4.0.0</framework-boot.version>
+        <!--plugin-->
+        <spring-boot-maven-plugin.version>3.4.0</spring-boot-maven-plugin.version>
+        <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
+        <maven-dependency-plugin.version>3.8.0</maven-dependency-plugin.version>
+        <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
+        <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
+        <maven-jar-plugin.version>3.4.2</maven-jar-plugin.version>
+        <!--dependencies-->
+        <spring-boot.version>3.4.0</spring-boot.version>
+        <spring-cloud.version>2022.0.3</spring-cloud.version>
+        <spring-cloud-alibaba.version>2022.0.0.0-RC2</spring-cloud-alibaba.version>
+        <mybatis-spring-boot-starter.version>3.0.4</mybatis-spring-boot-starter.version>
+        <httpclient.version>5.4.1</httpclient.version>
+        <java.websocket.version>1.6.0</java.websocket.version>
+        <commons-text.version>1.12.0</commons-text.version>
+        <shardingsphere.version>5.3.2</shardingsphere.version>
+        <jackson.version>2.18.2</jackson.version>
+        <fastjson2.version>2.0.36</fastjson2.version>
+        <mybatis-plus.version>3.5.9</mybatis-plus.version>
+        <dozer-core.version>7.0.0</dozer-core.version>
+        <hutool.version>5.8.44</hutool.version>
+        <redisson.version>3.27.2</redisson.version>
+        <guava.version>33.3.0-jre</guava.version>
+        <rocketmq-spring-boot-starter.version>2.3.4</rocketmq-spring-boot-starter.version>
+        <rocketmq-client-java.version>5.1.0</rocketmq-client-java.version>
+        <transmittable-thread-local.version>2.14.2</transmittable-thread-local.version>
+        <hippo4j-threadpool-config-mode.version>1.5.0</hippo4j-threadpool-config-mode.version>
+        <micrometer-registry-prometheus.version>1.10.6</micrometer-registry-prometheus.version>
+        <knife4j.version>4.5.0</knife4j.version>
+        <springdoc-openapi.version>2.8.6</springdoc-openapi.version>
+        <javafx.version>17.0.8</javafx.version>
+        <jsoup.version>1.20.1</jsoup.version>
+        <jwt.version>4.5.0</jwt.version>
+        <commons.net.version>3.11.1</commons.net.version>
+        <nashorn.version>15.4</nashorn.version>
+        <thumbnailator.version>0.4.20</thumbnailator.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.lumispring.framework</groupId>
+                <artifactId>framework-starter-parent</artifactId>
+                <version>${framework-boot.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.lumispring.framework</groupId>
+                <artifactId>framework-starter-base</artifactId>
+                <version>${framework-boot.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.lumispring.framework</groupId>
+                <artifactId>framework-starter-web</artifactId>
+                <version>${framework-boot.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.lumispring.framework</groupId>
+                <artifactId>framework-starter-security</artifactId>
+                <version>${framework-boot.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.lumispring.framework</groupId>
+                <artifactId>framework-starter-database-mysql</artifactId>
+                <version>${framework-boot.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.lumispring.framework</groupId>
+                <artifactId>framework-starter-database-mybatis-flux</artifactId>
+                <version>${framework-boot.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.lumispring.framework</groupId>
+                <artifactId>framework-starter-database-redis</artifactId>
+                <version>${framework-boot.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.lumispring.framework</groupId>
+                <artifactId>framework-starter-office</artifactId>
+                <version>${framework-boot.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.lumispring.framework</groupId>
+                <artifactId>framework-starter-api-openai</artifactId>
+                <version>${framework-boot.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.lumispring.framework</groupId>
+                <artifactId>framework-starter-api-liblib</artifactId>
+                <version>${framework-boot.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.lumispring.framework</groupId>
+                <artifactId>framework-starter-api-dingtalk</artifactId>
+                <version>${framework-boot.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.lumispring.framework</groupId>
+                <artifactId>framework-starter-api-binance</artifactId>
+                <version>${framework-boot.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.lumispring.framework</groupId>
+                <artifactId>framework-starter-ai</artifactId>
+                <version>${framework-boot.version}</version>
+            </dependency>
+
+            <!--kotlin核心依赖-->
+            <dependency>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-stdlib</artifactId>
+                <version>${kotlin.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-reflect</artifactId>
+                <version>${kotlin.version}</version>
+            </dependency>
+            <!--kotlin协程库-->
+            <dependency>
+                <groupId>org.jetbrains.kotlinx</groupId>
+                <artifactId>kotlinx-coroutines-core-jvm</artifactId>
+                <version>${kotlin.coroutine.version}</version>
+            </dependency>
+            <!--kotlin jackson模块-->
+            <dependency>
+                <groupId>com.fasterxml.jackson.module</groupId>
+                <artifactId>jackson-module-kotlin</artifactId>
+                <version>${kotlin.jackson.module.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-test-junit5</artifactId>
+                <version>${kotlin.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>com.alibaba.cloud</groupId>
+                <artifactId>spring-cloud-alibaba-dependencies</artifactId>
+                <version>${spring-cloud-alibaba.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.mybatis.spring.boot</groupId>
+                <artifactId>mybatis-spring-boot-starter</artifactId>
+                <version>${mybatis-spring-boot-starter.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.mybatis</groupId>
+                <artifactId>mybatis-spring</artifactId>
+                <version>${mybatis-spring-boot-starter.version}</version>
+            </dependency>
+
+            <!--mybatis-plus默认的mybatis-spring版本太低，在高版本springboot3中会报错factoryBeanObjectType，需要手动剔除且升级-->
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-boot-starter</artifactId>
+                <version>${mybatis-plus.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.mybatis</groupId>
+                        <artifactId>mybatis-spring</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <!--高版本mbp的分页插件被拆分出一个新模块了-->
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-jsqlparser</artifactId>
+                <version>${mybatis-plus.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.shardingsphere</groupId>
+                <artifactId>shardingsphere-jdbc-core</artifactId>
+                <version>${shardingsphere.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson-bom.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.httpcomponents.client5</groupId>
+                <artifactId>httpclient5</artifactId>
+                <version>${httpclient.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.java-websocket</groupId>
+                <artifactId>Java-WebSocket</artifactId>
+                <version>${java.websocket.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-text</artifactId>
+                <version>${commons-text.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.alibaba.fastjson2</groupId>
+                <artifactId>fastjson2</artifactId>
+                <version>${fastjson2.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>cn.hutool</groupId>
+                <artifactId>hutool-bom</artifactId>
+                <version>${hutool.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.redisson</groupId>
+                <artifactId>redisson-spring-boot-starter</artifactId>
+                <version>${redisson.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.rocketmq</groupId>
+                <artifactId>rocketmq-spring-boot-starter</artifactId>
+                <version>${rocketmq-spring-boot-starter.version}</version>
+            </dependency>
+
+            <!--用于新版的Rocketmq5客户端-->
+            <dependency>
+                <groupId>org.apache.rocketmq</groupId>
+                <artifactId>rocketmq-client-java</artifactId>
+                <version>${rocketmq-client-java.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>transmittable-thread-local</artifactId>
+                <version>${transmittable-thread-local.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>cn.hippo4j</groupId>
+                <artifactId>hippo4j-config-spring-boot-starter</artifactId>
+                <version>${hippo4j-threadpool-config-mode.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.micrometer</groupId>
+                <artifactId>micrometer-registry-prometheus</artifactId>
+                <version>${micrometer-registry-prometheus.version}</version>
+            </dependency>
+
+            <!--knife4j，api文档ui-->
+            <dependency>
+                <groupId>com.github.xiaoymin</groupId>
+                <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
+                <version>${knife4j.version}</version>
+            </dependency>
+
+<!--            <dependency>-->
+<!--                <groupId>org.springdoc</groupId>-->
+<!--                <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>-->
+<!--                <version>${springdoc-openapi.version}</version>-->
+<!--            </dependency>-->
+
+            <!--javaFx，桌面端开发-->
+            <dependency>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-controls</artifactId>
+                <version>${javafx.version}</version>
+            </dependency>
+
+            <!--用于Html解析-->
+            <dependency>
+                <groupId>org.jsoup</groupId>
+                <artifactId>jsoup</artifactId>
+                <version>${jsoup.version}</version>
+            </dependency>
+
+            <!--用于jwt身份验证-->
+            <dependency>
+                <groupId>com.auth0</groupId>
+                <artifactId>java-jwt</artifactId>
+                <version>${jwt.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>commons-net</groupId>
+                <artifactId>commons-net</artifactId>
+                <version>${commons.net.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.openjdk.nashorn</groupId>
+                <artifactId>nashorn-core</artifactId>
+                <version>${nashorn.version}</version>
+            </dependency>
+
+            <!--图片处理工具-->
+            <dependency>
+                <groupId>net.coobird</groupId>
+                <artifactId>thumbnailator</artifactId>
+                <version>${thumbnailator.version}</version>
+            </dependency>
+
+        </dependencies>
+    </dependencyManagement>
+
+    <!--默认依赖-->
+    <dependencies>
+        <!--kotlin核心依赖-->
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-stdlib</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-reflect</artifactId>
+        </dependency>
+        <!--kotlin协程库-->
+        <dependency>
+            <groupId>org.jetbrains.kotlinx</groupId>
+            <artifactId>kotlinx-coroutines-core-jvm</artifactId>
+        </dependency>
+        <!--kotlin jackson模块-->
+        <dependency>
+            <groupId>com.fasterxml.jackson.module</groupId>
+            <artifactId>jackson-module-kotlin</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <sourceDirectory>src/main/java</sourceDirectory>
+        <testSourceDirectory>src/test/java</testSourceDirectory>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <excludes>
+                    <exclude>public/**/*</exclude>
+                    <exclude>static/**/*</exclude>
+                    <exclude>templates/**/*</exclude>
+                    <exclude>com/**/*</exclude>
+                </excludes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+                <includes>
+                    <include>public/**/*</include>
+                    <include>static/**/*</include>
+                    <include>templates/**/*</include>
+                    <include>com/**/*</include>
+                </includes>
+            </resource>
+        </resources>
+        <testResources>
+            <testResource>
+                <directory>src/test/resources</directory>
+                <filtering>true</filtering>
+                <excludes>
+                    <exclude>public/**/*</exclude>
+                    <exclude>static/**/*</exclude>
+                    <exclude>templates/**/*</exclude>
+                    <exclude>com/**/*</exclude>
+                </excludes>
+            </testResource>
+            <testResource>
+                <directory>src/test/resources</directory>
+                <filtering>false</filtering>
+                <includes>
+                    <include>public/**/*</include>
+                    <include>static/**/*</include>
+                    <include>templates/**/*</include>
+                    <include>com/**/*</include>
+                </includes>
+            </testResource>
+        </testResources>
+        <pluginManagement>
+            <plugins>
+                <!--配置了spring-boot-maven-plugin后打包的jar就能通过jar -r 运行-->
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <version>${spring-boot-maven-plugin.version}</version>
+                    <configuration>
+                        <excludes>
+                            <exclude>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok</artifactId>
+                            </exclude>
+                        </excludes>
+                        <mainClass>${spring-boot.run.main-class}</mainClass>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.jetbrains.kotlin</groupId>
+                    <artifactId>kotlin-maven-plugin</artifactId>
+                    <version>${kotlin.version}</version>
+                    <executions>
+                        <execution>
+                            <id>compile</id>
+                            <phase>compile</phase>
+                            <goals>
+                                <goal>compile</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>test-compile</id>
+                            <phase>test-compile</phase>
+                            <goals>
+                                <goal>test-compile</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <jvmTarget>${java.version}</jvmTarget>
+                        <compilerPlugins>
+                            <plugin>spring</plugin>
+                        </compilerPlugins>
+                        <args>
+                            <!--用于启用 Kotlin 中的实验性特性-->
+                            <arg>-opt-in=kotlin.contracts.ExperimentalContracts</arg>
+                            <!---Xjsr305=strict 参数将编译器设置为严格模式，这意味着编译器会更严格地处理 JSR-305 注解-->
+                            <arg>-Xjsr305=strict</arg>
+                        </args>
+                    </configuration>
+                    <dependencies>
+                        <!--为每个类加上open前缀（可继承），方便spring框架底层代理继承-->
+                        <dependency>
+                            <groupId>org.jetbrains.kotlin</groupId>
+                            <artifactId>kotlin-maven-allopen</artifactId>
+                            <version>${kotlin.version}</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven-compiler-plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <id>default-compile</id>
+                            <phase>none</phase>
+                        </execution>
+                        <execution>
+                            <id>default-testCompile</id>
+                            <phase>none</phase>
+                        </execution>
+                        <execution>
+                            <id>java-compile</id>
+                            <phase>compile</phase>
+                            <goals>
+                                <goal>compile</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>java-test-compile</id>
+                            <phase>test-compile</phase>
+                            <goals>
+                                <goal>testCompile</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <source>${java.version}</source>
+                        <target>${java.version}</target>
+                        <encoding>utf-8</encoding>
+                    </configuration>
+                </plugin>
+
+                <!-- 资源拷贝插件，通过这个插件可以将资源文件拷贝到指定的target目录下 -->
+<!--                <plugin>-->
+<!--                    <groupId>org.apache.maven.plugins</groupId>-->
+<!--                    <artifactId>maven-resources-plugin</artifactId>-->
+<!--                    <version>${maven-resources-plugin.version}</version>-->
+<!--                    <executions>-->
+<!--                        <execution>-->
+<!--                            <id>default-resources</id>-->
+<!--                            <phase>compile</phase>-->
+<!--                            <goals>-->
+<!--                                <goal>resources</goal>-->
+<!--                            </goals>-->
+<!--                            <configuration>-->
+<!--                                <encoding>utf-8</encoding>-->
+<!--                                <outputDirectory>${project.build.directory}/classes</outputDirectory>-->
+<!--                            </configuration>-->
+<!--                        </execution>-->
+<!--                        <execution>-->
+<!--                            <id>resources</id>-->
+<!--                            <phase>package</phase>-->
+<!--                            <goals>-->
+<!--                                <goal>resources</goal>-->
+<!--                            </goals>-->
+<!--                            <configuration>-->
+<!--                                <encoding>utf-8</encoding>-->
+<!--                                <outputDirectory>${project.build.directory}/build</outputDirectory>-->
+<!--                            </configuration>-->
+<!--                        </execution>-->
+<!--                    </executions>-->
+<!--                </plugin>-->
+                <!-- 拷贝依赖lib -->
+<!--                <plugin>-->
+<!--                    <groupId>org.apache.maven.plugins</groupId>-->
+<!--                    <artifactId>maven-dependency-plugin</artifactId>-->
+<!--                    <version>${maven-dependency-plugin.version}</version>-->
+<!--                    <executions>-->
+<!--                        <execution>-->
+<!--                            <id>copy-dependencies</id>-->
+<!--                            <phase>compile</phase>-->
+<!--                            <goals>-->
+<!--                                <goal>copy-dependencies</goal>-->
+<!--                            </goals>-->
+<!--                            <configuration>-->
+<!--                                <outputDirectory>${project.build.directory}/build/lib</outputDirectory>-->
+<!--                                <overWriteReleases>false</overWriteReleases>-->
+<!--                                <overWriteSnapshots>true</overWriteSnapshots>-->
+<!--                                <overWriteIfNewer>true</overWriteIfNewer>-->
+<!--                                <includeScope>runtime</includeScope>-->
+<!--                            </configuration>-->
+<!--                        </execution>-->
+<!--                    </executions>-->
+<!--                </plugin>-->
+
+<!--                <plugin>-->
+<!--                    <groupId>org.apache.maven.plugins</groupId>-->
+<!--                    <artifactId>maven-surefire-plugin</artifactId>-->
+<!--                    <version>2.12.4</version>-->
+<!--                    <configuration>-->
+<!--                        <skipTests>true</skipTests>-->
+<!--                    </configuration>-->
+<!--                </plugin>-->
+
+                <!--打包一份source源码包-->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>${maven-source-plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <id>attach-sources</id>
+                            <phase>install</phase>
+                            <goals>
+                                <goal>jar-no-fork</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
+        <!--默认插件-->
+        <plugins>
+            <!--kotlin 打包插件 -->
+            <plugin>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-maven-plugin</artifactId>
+            </plugin>
+
+            <!--已内置的maven编译配置，可配可不配，但如果你内置的maven里setting是1.8，如果不配这个，每次启动idea默认是level 8-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+            <!--资源拷贝插件-->
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-resources-plugin</artifactId>-->
+<!--            </plugin>-->
+
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-dependency-plugin</artifactId>-->
+<!--            </plugin>-->
+
+            <!--方便其他项目在依赖这个项目时，可以获取到源码 JAR 文件-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+    <!-- 配置阿里云仓库 -->
+    <repositories>
+        <repository>
+            <id>aliyun-repos</id>
+            <url>https://maven.aliyun.com/repository/public</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>aliyun-repos</id>
+            <url>https://maven.aliyun.com/repository/public</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
+
+</project>

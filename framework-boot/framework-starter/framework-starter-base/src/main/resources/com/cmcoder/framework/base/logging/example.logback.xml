@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!--默认-->
+    <include resource="com/lumispring/framework/base/logging/base.xml" />
+    <!--JMX支持-->
+    <jmxConfigurator/>
+</configuration>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+Zee Boot logback based on Spring Boot logback
+-->
+
+<included>
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_FILE}</file>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>${FILE_LOG_PATTERN}</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${ROTATE_FILE_LOG}</fileNamePattern>
+            <maxFileSize>50MB</maxFileSize>
+            <maxHistory>${FILE_LOG_MAX_HISTORY}</maxHistory>
+        </rollingPolicy>
+    </appender>
+</included>
