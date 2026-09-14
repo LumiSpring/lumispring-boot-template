@@ -28,6 +28,7 @@ class ChainerContext : ApplicationRunner {
     companion object {
         private val chainContainer: MutableMap<String, MutableList<IChain<*>>> = mutableMapOf()
 
+        @Suppress("UNCHECKED_CAST")
         fun <T> handle(mark: String, requestParam: T, reversed:Boolean = false) {
             if (requestParam.isNull()) throw ErrorCode.REQUEST_PARAM_ERROR.exception(log="参数不能为空")
             (if (reversed)chainContainer[mark]?.reversed() else chainContainer[mark])?.forEach { chain->

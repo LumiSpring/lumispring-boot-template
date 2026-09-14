@@ -3,7 +3,6 @@ package com.lumispring.framework.base.extension
 import org.apache.hc.core5.http.message.BasicNameValuePair
 import java.io.ByteArrayOutputStream
 import java.net.URI
-import java.net.URL
 import java.net.URLDecoder
 import java.net.URLEncoder
 import java.nio.charset.Charset
@@ -38,7 +37,7 @@ fun String.isBase64(): Boolean {
 
 fun String.urlToBase64Str(): String? {
     try {
-        return URL(this).readBytes().base64Encode2Str()
+        return URI.create(this).toURL().readBytes().base64Encode2Str()
     } catch (e: Exception) {
         e.printStackTrace()
     }
@@ -47,7 +46,7 @@ fun String.urlToBase64Str(): String? {
 
 fun String.urlToEncodeUrl(): String {
     try {
-        val url = URL(this)
+        val url = URI.create(this).toURL()
         return URI(url.protocol, url.userInfo, url.host, url.port, url.path, url.query, url.ref).toString()
     } catch (e: Exception) {
         e.printStackTrace()

@@ -257,7 +257,7 @@ internal fun <T> AbstractRequestBuilder<T>.generateUri(
                     }
                 }
             } else if (data is String) {
-                uriBuilder.setCustomQuery(data.toString())
+                uriBuilder.setCustomQuery(data)
             } else {
                 val dataMap = data.toSMap()
                 dataMap?.forEach { (k, v) ->
@@ -308,7 +308,7 @@ internal fun generateClassicRequest(
                         }
                     }))
                 } else if (data is String) {
-                    requestBuilder.setEntity(StringEntity(data.toString(), ContentType.APPLICATION_FORM_URLENCODED))
+                    requestBuilder.setEntity(StringEntity(data, ContentType.APPLICATION_FORM_URLENCODED))
                 } else {
                     val dataMap = data.toObject<SMap>()
                     requestBuilder.setEntity(UrlEncodedFormEntity(mutableListOf<BasicNameValuePair>().apply {

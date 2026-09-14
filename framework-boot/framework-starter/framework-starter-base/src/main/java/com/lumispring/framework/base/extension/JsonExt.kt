@@ -118,7 +118,7 @@ fun <T> parseJson(json: String, type: Class<T>, om: ObjectMapper = DEFAULT_OBJEC
         // 如果是字符串类型，且是以双引号开头，则可通过om.readValue转化，最终去除双引号
         return if (json.matches(Regex("^\".*\"$", RegexOption.DOT_MATCHES_ALL))) {
             om.readValue(json, type)
-        } else json as T
+        } else type.cast(json)
     }
 
     if (json.isBlank()) return null
@@ -133,8 +133,8 @@ fun <T> parseJson(json: String, type: Class<T>, om: ObjectMapper = DEFAULT_OBJEC
         if (type.simpleName == "Object"){
             // 如果是字符串类型，且是以双引号开头，则可通过om.readValue转化，最终去除双引号
             return if (json.matches(Regex("^\".*\"$", RegexOption.DOT_MATCHES_ALL))) {
-                om.readValue(json, String::class.java) as T
-            } else json as T
+                type.cast(om.readValue(json, String::class.java))
+            } else type.cast(json)
         }
         throw e
     }

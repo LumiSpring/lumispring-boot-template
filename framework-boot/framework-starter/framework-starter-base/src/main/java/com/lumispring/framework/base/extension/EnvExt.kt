@@ -32,10 +32,15 @@ val OS_NAME:  String = System.getProperty("os.name")
  * 执行系统命令行命令
  */
 fun String.runCommand(): String {
-    val process = Runtime.getRuntime().exec(this)
+    val command = if (OS_NAME.contains("win", ignoreCase = true)) {
+        listOf("cmd", "/c", this)
+    } else {
+        listOf("sh", "-c", this)
+    }
+    val process = ProcessBuilder(command).redirectErrorStream(true).start()
     process.waitFor()
     // 返回执行结果
-    return process.inputReader().lines().map { it }.toList().joinToString("\n").also {
+    return process.inputReader().lines().toList().joinToString("\n").also {
         process.destroy()
     }
 }

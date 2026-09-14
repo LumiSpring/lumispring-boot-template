@@ -59,7 +59,7 @@ fun reqGetCookies():Map<String, String>{
             cookieMap[cookie.name] = cookie.value
         }
         cookieMap
-    } ?: emptyMap()
+    }
 }
 
 /**

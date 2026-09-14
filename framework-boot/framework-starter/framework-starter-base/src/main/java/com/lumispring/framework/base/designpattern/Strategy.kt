@@ -44,9 +44,9 @@ class StrategyContext() : ApplicationRunner, Ordered {
          * @param clazz 策略类的类型
          */
         fun <T : IStrategy<*, *>> get(clazz: Class<T>): List<T> {
-            return strategyContainer.values.filter { strategy ->
-                clazz.isAssignableFrom(strategy.javaClass)
-            }.map { it as T }
+            return strategyContainer.values.mapNotNull { strategy ->
+                if (clazz.isAssignableFrom(strategy.javaClass)) clazz.cast(strategy) else null
+            }
         }
 
         /**

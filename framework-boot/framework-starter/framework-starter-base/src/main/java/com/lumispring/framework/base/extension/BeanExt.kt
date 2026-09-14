@@ -64,8 +64,8 @@ inline fun <reified T> T?.merge(other: Any?): T? {
 fun Any?.getValue(vararg keys: String): Any? {
     var value: Any? = this
     keys.forEach { key ->
-        if (value is Map<*,*>) value = (value as Map<*, *>)[key]
-        else if (value is List<*>) value = (value as List<*>)[key.toInt()]
+        if (value is Map<*, *>) value = value[key]
+        else if (value is List<*>) value = value[key.toInt()]
         else value = value.toSMap()?.get(key)
     }
     return value

@@ -26,7 +26,7 @@ fun Any.toInputStream(): InputStream {
     return when (this) {
         is String -> {
             if (this.startsWith("http")) {
-                URL(this).openStream()
+                URI.create(this).toURL().openStream()
             } else {
                 File(this).inputStream()
             }
@@ -55,7 +55,7 @@ fun String.toFile(fileName: String? = null, useCache: Boolean = true): File {
         val targetFile = File(TMP_DIR, targetName)
         targetFile.apply {
             if (!exists() || !useCache) {
-                URL(url).openStream().copyToFile(this)
+                URI.create(url).toURL().openStream().copyToFile(this)
                 logInfo("从远程下载文件：$url => ${this.absolutePath}")
             }
         }
@@ -209,16 +209,16 @@ fun List<File>.toZip(outputZipFilePath: String) = this.toZip(File(outputZipFileP
  */
 fun File.unZip(outputDirectory: File = this.parentFile) {
     ZipInputStream(BufferedInputStream(FileInputStream(this))).use { zipInput ->
-        var entry: ZipEntry?
-        while (zipInput.nextEntry.also { entry = it } != null) {
-            val entryFile = File(outputDirectory, entry!!.name)
+        while (true) {
+            val entry = zipInput.nextEntry ?: break
+            val entryFile = File(outputDirectory, entry.name)
             val entryDir = entryFile.parentFile
 
             if (!entryDir.exists()) {
                 entryDir.mkdirs()
             }
 
-            if (!entry!!.isDirectory) {
+            if (!entry.isDirectory) {
                 FileOutputStream(entryFile).use { fileOutput ->
                     zipInput.copyTo(fileOutput)
                 }
