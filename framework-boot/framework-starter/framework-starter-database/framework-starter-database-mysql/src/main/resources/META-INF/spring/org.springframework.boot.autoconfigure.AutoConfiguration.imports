@@ -1,0 +1,2 @@
+# springboot3需要这样完成自动装配
+com.lumispring.framework.database.mysql.MysqlAutoConfiguration
