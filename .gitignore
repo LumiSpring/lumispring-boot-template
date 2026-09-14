@@ -50,3 +50,4 @@ build/
 /application/data/tmp/
 **/application-local.yml
 **/tmp
+/.cursor/
