@@ -1,45 +1,35 @@
 package com.lumispring.framework.security.config
 
-import com.lumispring.framework.database.redis.core.RedisClient
-import com.lumispring.framework.security.extension.setCurrentUser
-import com.lumispring.framework.security.model.vo.UserVO
+import com.lumispring.framework.security.auth.AuthenticationResolver
+import com.lumispring.framework.security.auth.SecurityContext
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import org.springframework.beans.factory.ObjectProvider
 import org.springframework.web.servlet.HandlerInterceptor
 
 /**
- * 安全拦截器
+ * 调用 [AuthenticationResolver] 解析当前主体，并在请求结束时清理上下文。
  */
 class SecurityInterceptor(
-    private val properties: SecurityProperties
+    private val resolvers: ObjectProvider<AuthenticationResolver>
 ) : HandlerInterceptor {
 
-    /**
-     * 在请求处理之前进行调用（Controller方法调用之前）
-     * 返回true：放行该请求
-     * 返回false：拦截该请求
-     */
     override fun preHandle(
         request: HttpServletRequest,
         response: HttpServletResponse,
         handler: Any
     ): Boolean {
-        /**
-         * Token的获取方式
-         * 1. Authorization请求头， Bearer Token
-         * 2. Cookie Token
-         */
-        val token = request.getHeader("Authorization")?.replace("Bearer ", "")
-            ?: request.cookies?.firstOrNull { it.name == "token" }?.value
+        val resolver = resolvers.getIfAvailable()
+        SecurityContext.set(resolver?.resolve(request))
+        return true
+    }
 
-        if (!token.isNullOrBlank()){
-            val userVo = RedisClient.get<UserVO>("${SecurityRedisKeyConst.USER_INFO_BY_TOKEN_PREFIX}:${token}")
-            userVo?.let {
-                it.token = token
-                setCurrentUser(it)
-            }
-        }
-
-        return super.preHandle(request, response, handler)
+    override fun afterCompletion(
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+        handler: Any,
+        ex: Exception?
+    ) {
+        SecurityContext.clear()
     }
 }

@@ -14,9 +14,10 @@ Current versions: framework `4.1.1.0` · Spring Boot `4.1.1` · Kotlin `2.4.20` 
 | `framework-starter-web` | Spring MVC, response wrapping, global exception handling, trace IDs, SSE, validation, springdoc OpenAPI |
 | `framework-starter-database-mysql` | MyBatis-Plus, pagination, auto-fill, JDBC/SQL extensions |
 | `framework-starter-database-redis` | RedisTemplate, Redisson, distributed locks, Bloom filters, collections, and geo helpers |
-| `framework-starter-security` | Login/register, tokens, users/roles/permissions, and RBAC annotations |
+| `framework-starter-security` | Auth annotations, `AuthPrincipal`, and `AuthenticationResolver` SPI |
+| `framework-starter-security-rbac` | Built-in login/register, tokens, user/role/permission tables and admin APIs |
 
-`framework-starter-web` currently brings MySQL transitively. `framework-starter-security` brings web, MySQL, and Redis.
+`framework-starter-web` currently brings MySQL transitively. `framework-starter-security` depends on web only. `framework-starter-security-rbac` brings the security kernel, MySQL, and Redis.
 
 ## Repository layout
 
@@ -110,7 +111,7 @@ security:
   enabled: false
 ```
 
-Before enabling security, provide a default `DataSource` and Redis, then apply `framework-starter-security/src/main/resources/db/schema.sql`. The bundled administrator is for local development only. Replace or remove it before any reachable deployment, and do not publish the seed password.
+Before enabling the bundled RBAC, provide a default `DataSource` and Redis, then apply `framework-starter-security-rbac/src/main/resources/db/schema.sql`. The bundled administrator is for local development only. Replace or remove it before any reachable deployment, and do not publish the seed password. If you only need the annotations and will implement login yourself, depend on `framework-starter-security` and provide an `AuthenticationResolver`.
 
 OpenAPI UI is available at `/swagger-ui.html` by default.
 

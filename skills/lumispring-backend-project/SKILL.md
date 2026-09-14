@@ -59,7 +59,8 @@ Select the smallest effective dependency set:
 - `framework-starter-web`: base + MVC, response wrapping, exception handling, trace IDs, SSE, validation, springdoc OpenAPI UI, and currently MySQL transitively.
 - `framework-starter-database-mysql`: MyBatis-Plus, pagination, metadata fill, JDBC/select/update extensions.
 - `framework-starter-database-redis`: Redisson, Redis templates, collections, locks, Bloom filters, scripts, geo, and HyperLogLog helpers.
-- `framework-starter-security`: web + MySQL + Redis, authentication endpoints, user/role/permission models, annotations, and RBAC.
+- `framework-starter-security`: web, `@RequireLogin` / `@RequireRole` / `@RequireAdmin`, `AuthPrincipal`, and `AuthenticationResolver`.
+- `framework-starter-security-rbac`: security kernel + MySQL + Redis, built-in login/token, user/role/permission models and admin APIs.
 
 Avoid redundant direct dependencies when a selected Starter already brings them transitively, but keep an explicit dependency if the project deliberately wants that capability to remain even after upstream dependency changes.
 
@@ -67,13 +68,15 @@ Use framework APIs rather than recreating them. Typical imports and configuratio
 
 ## Security guardrails
 
-The security Starter is enabled when `security.enabled` is absent. Keep it disabled until the application has a working `DataSource`, `StringRedisTemplate`, and initialized security schema. When enabling it:
+The security kernel is enabled when `security.enabled` is absent. Keep it disabled until the application is ready. For built-in RBAC (`framework-starter-security-rbac`), also wait until you have a working `DataSource`, Redis, and initialized security schema. When enabling RBAC:
 
 - configure secrets through environment variables or a secret manager;
-- initialize `framework-starter-security/src/main/resources/db/schema.sql` deliberately;
+- initialize `framework-starter-security-rbac/src/main/resources/db/schema.sql` deliberately;
 - inspect the local schema and replace or remove its development seed administrator before the first externally reachable startup; never repeat the seed password in generated public documentation;
 - do not configure the API-key bypass unless the user explicitly needs it;
-- note that Security reuses the application's default DataSource and Redis; do not configure `spring.datasource.security.*` or `security.redis.*`.
+- note that RBAC reuses the application's default DataSource and Redis.
+
+To use only the annotations with a custom login, depend on `framework-starter-security` and register an `AuthenticationResolver`. Do not add the RBAC starter in that case.
 
 ## Verify the result
 

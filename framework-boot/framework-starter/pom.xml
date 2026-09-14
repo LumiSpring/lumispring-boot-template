@@ -19,6 +19,7 @@
         <module>framework-starter-base</module>
         <module>framework-starter-database</module>
         <module>framework-starter-security</module>
+        <module>framework-starter-security-rbac</module>
     </modules>
 
     <properties>

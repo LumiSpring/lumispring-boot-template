@@ -96,6 +96,12 @@
 
             <dependency>
                 <groupId>com.lumispring.framework</groupId>
+                <artifactId>framework-starter-security-rbac</artifactId>
+                <version>${framework-boot.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.lumispring.framework</groupId>
                 <artifactId>framework-starter-database-mysql</artifactId>
                 <version>${framework-boot.version}</version>
             </dependency>

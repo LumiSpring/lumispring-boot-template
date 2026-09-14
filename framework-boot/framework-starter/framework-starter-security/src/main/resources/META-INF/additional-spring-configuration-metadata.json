@@ -10,7 +10,7 @@
     {
       "name": "security.enabled",
       "type": "java.lang.Boolean",
-      "description": "是否启用安全模块（登录、权限校验等）",
+      "description": "是否启用安全内核（鉴权注解与当前用户解析）",
       "defaultValue": true,
       "sourceType": "com.lumispring.framework.security.config.SecurityProperties"
     },

@@ -103,12 +103,21 @@ Use namespaced keys, bounded TTLs for caches, and `tryLock` where unbounded wait
 
 ## Security and RBAC
 
-Dependency:
+Annotations, `AuthPrincipal`, and `AuthenticationResolver` live in the kernel:
 
 ```xml
 <dependency>
     <groupId>com.lumispring.framework</groupId>
     <artifactId>framework-starter-security</artifactId>
+</dependency>
+```
+
+Built-in login, user tables, and admin APIs are optional:
+
+```xml
+<dependency>
+    <groupId>com.lumispring.framework</groupId>
+    <artifactId>framework-starter-security-rbac</artifactId>
 </dependency>
 ```
 
@@ -119,7 +128,9 @@ security:
   enabled: false
 ```
 
-When enabling it, configure a default Spring `DataSource` and Redis, then initialize the schema shipped at `framework-starter-security/src/main/resources/db/schema.sql`. Security reuses those default beans; there is no independent `spring.datasource.security.*` or `security.redis.*` connection.
+When using the RBAC starter, configure a default Spring `DataSource` and Redis, then initialize the schema shipped at `framework-starter-security-rbac/src/main/resources/db/schema.sql`. RBAC reuses those default beans.
+
+To keep the annotations but supply your own login, depend only on `framework-starter-security` and register an `AuthenticationResolver`. Put the business user object on `AuthPrincipal.userDetails` and read it with `currentUser<YourUserVO>()` or `principal.asUser(YourUserVO::class)`.
 
 Shared infrastructure example:
 
@@ -146,9 +157,11 @@ import com.lumispring.framework.security.config.annotation.UnAuth
 - `@RequireRole("editor", "reviewer", mode = RequireRole.RoleCheckMode.ALL)`: all listed roles required.
 - `@UnAuth`: bypass normal authentication for a public endpoint; use sparingly.
 
-Current-user helpers are in `com.lumispring.framework.security.extension`: `currentUser`, `currentUserId`, `currentUsername`, `currentUserRoles`, `currentToken`, and `isAdmin`.
+Kernel helpers are in `com.lumispring.framework.security.auth`: `currentPrincipal`, `currentUser<T>()`, `currentUserId` (String), `currentUsername`, `currentRoles`, and `isAdmin`.
 
-Built-in endpoints include login/register/logout, user/password operations, and admin APIs for users, roles, and permissions. Treat registration openness and the API-key bypass as policies to review before production.
+RBAC helpers remain in `com.lumispring.framework.security.extension`: `currentUser` returns `UserVO`, and `currentUserId` returns `Long`.
+
+Built-in RBAC endpoints include login/register/logout, user/password operations, and admin APIs for users, roles, and permissions. Treat registration openness and the API-key bypass as policies to review before production.
 
 The bundled schema contains a development seed administrator. Inspect it locally, replace or remove the seed before any externally reachable deployment, and do not repeat its password in generated public documentation.
 
@@ -160,6 +173,7 @@ The bundled schema contains a development seed administrator. Inspect it locally
 | HTTP API, response wrapping, validation, docs, SSE | `framework-starter-web` |
 | MyBatis-Plus without web | `framework-starter-database-mysql` |
 | Redis/Redisson without security | `framework-starter-database-redis` |
-| built-in auth and RBAC | `framework-starter-security` |
+| built-in auth and RBAC | `framework-starter-security-rbac` |
+| annotations only, custom login | `framework-starter-security` |
 
-In version `4.1.1.0`, security brings web, MySQL, and Redis; web brings MySQL. Re-check transitive dependencies after framework upgrades.
+In version `4.1.1.0`, `framework-starter-security` brings web; `framework-starter-security-rbac` brings the kernel, MySQL, and Redis; web brings MySQL. Re-check transitive dependencies after framework upgrades.

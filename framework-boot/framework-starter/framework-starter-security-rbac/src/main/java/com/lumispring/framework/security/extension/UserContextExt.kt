@@ -1,22 +1,32 @@
 package com.lumispring.framework.security.extension
 
-import com.alibaba.ttl.TransmittableThreadLocal
-import com.lumispring.framework.base.extension.getBeanOrNull
+import com.lumispring.framework.security.auth.DefaultAuthPrincipal
+import com.lumispring.framework.security.auth.SecurityContext
+import com.lumispring.framework.security.auth.currentPrincipal
+import com.lumispring.framework.security.auth.currentUser as currentUserDetails
 import com.lumispring.framework.security.model.vo.UserVO
-import com.lumispring.framework.security.service.UserService
 
+fun currentUser(): UserVO? = currentUserDetails<UserVO>()
 
-private val userThreadLocal = TransmittableThreadLocal<UserVO>()
-
-private val userService by lazy {
-    getBeanOrNull(UserService::class.java)
+fun setCurrentUser(user: UserVO?) {
+    if (user == null) {
+        SecurityContext.clear()
+        return
+    }
+    val userId = user.id?.toString() ?: return
+    SecurityContext.set(
+        DefaultAuthPrincipal(
+            id = userId,
+            username = user.username,
+            roles = user.roles.orEmpty().toSet(),
+            permissions = emptySet(),
+            admin = user.isAdmin(),
+            userDetails = user
+        )
+    )
 }
 
-fun currentUser(): UserVO? = userThreadLocal.get()
-
-fun setCurrentUser(user: UserVO?) = userThreadLocal.set(user)
-
-fun removeCurrentUser() = userThreadLocal.remove()
+fun removeCurrentUser() = SecurityContext.clear()
 
 fun currentUsername(): String? = currentUser()?.username
 
@@ -26,11 +36,7 @@ fun currentUserRoles(): List<String>? = currentUser()?.roles
 
 fun currentToken(): String? = currentUser()?.token
 
-/**
- * 是否是管理员用户
- */
-fun isAdmin(): Boolean = currentUser()?.isAdmin() == true
-
+fun isAdmin(): Boolean = currentPrincipal()?.admin == true
 
 /**
  * 当前用户上下文持有者（供其他模块通过反射获取）
@@ -52,8 +58,5 @@ object CurrentUserContext {
     fun getCurrentToken(): String? = currentToken()
 
     @JvmStatic
-    fun isAdmin(): Boolean = currentUser()?.isAdmin() == true
+    fun isAdmin(): Boolean = currentPrincipal()?.admin == true
 }
-
-
-

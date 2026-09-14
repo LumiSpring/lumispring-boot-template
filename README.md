@@ -14,9 +14,10 @@
 | `framework-starter-web` | Spring MVC、统一响应包装、全局异常、链路 Trace、SSE、校验、springdoc OpenAPI |
 | `framework-starter-database-mysql` | MyBatis-Plus、分页、字段自动填充、JDBC/SQL 扩展 |
 | `framework-starter-database-redis` | RedisTemplate、Redisson、分布式锁、布隆过滤器、集合与 Geo 等操作 |
-| `framework-starter-security` | 登录注册、Token、用户/角色/权限与 RBAC 注解 |
+| `framework-starter-security` | 鉴权注解、`AuthPrincipal` 与 `AuthenticationResolver` SPI |
+| `framework-starter-security-rbac` | 开箱登录注册、Token、用户/角色/权限表与管理接口 |
 
-`framework-starter-web` 当前会传递依赖 MySQL；`framework-starter-security` 会带上 Web、MySQL 和 Redis。
+`framework-starter-web` 当前会传递依赖 MySQL；`framework-starter-security` 只依赖 Web；`framework-starter-security-rbac` 会带上 Security 内核、MySQL 和 Redis。
 
 ## 仓库结构
 
@@ -110,7 +111,7 @@ security:
   enabled: false
 ```
 
-启用安全前请准备好默认数据源和 Redis，并执行 `framework-starter-security/src/main/resources/db/schema.sql`。内置管理员账号仅供本地开发，上线前必须替换或删除，不要把种子密码写进公开文档。
+启用内置 RBAC 前请准备好默认数据源和 Redis，并执行 `framework-starter-security-rbac/src/main/resources/db/schema.sql`。内置管理员账号仅供本地开发，上线前必须替换或删除，不要把种子密码写进公开文档。只需要注解、登录自己实现时，依赖 `framework-starter-security` 并提供 `AuthenticationResolver` 即可。
 
 OpenAPI 文档默认在 `/swagger-ui.html`。
 

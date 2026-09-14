@@ -13,7 +13,7 @@ STARTER_ARTIFACTS = {
     "web": "framework-starter-web",
     "mysql": "framework-starter-database-mysql",
     "redis": "framework-starter-database-redis",
-    "security": "framework-starter-security",
+    "security": "framework-starter-security-rbac",
 }
 
 

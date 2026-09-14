@@ -22,22 +22,6 @@
             <groupId>com.lumispring.framework</groupId>
             <artifactId>framework-starter-web</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>com.lumispring.framework</groupId>
-            <artifactId>framework-starter-database-mysql</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.lumispring.framework</groupId>
-            <artifactId>framework-starter-database-redis</artifactId>
-        </dependency>
-
-        <!-- 密码加密 -->
-        <dependency>
-            <groupId>cn.hutool</groupId>
-            <artifactId>hutool-crypto</artifactId>
-        </dependency>
     </dependencies>
 
 </project>

@@ -1,33 +1,34 @@
 package com.lumispring.framework.security
 
+import com.lumispring.framework.security.auth.AuthenticationResolver
 import com.lumispring.framework.security.config.SecurityInterceptor
 import com.lumispring.framework.security.config.SecurityProperties
-import org.mybatis.spring.annotation.MapperScan
-import org.springframework.beans.factory.annotation.Autowired
+import com.lumispring.framework.security.config.aop.SecurityAspect
+import org.springframework.beans.factory.ObjectProvider
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
-import org.springframework.context.annotation.ComponentScan
+import org.springframework.boot.context.properties.EnableConfigurationProperties
+import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 
-
 @Configuration
-@ComponentScan(basePackageClasses = [SecurityAutoConfiguration::class])
-@MapperScan("com.lumispring.framework.security.mapper")
+@EnableConfigurationProperties(SecurityProperties::class)
 @ConditionalOnProperty(name = ["security.enabled"], havingValue = "true", matchIfMissing = true)
-class SecurityAutoConfiguration : WebMvcConfigurer{
-
-    @Autowired
-    private lateinit var properties: SecurityProperties
+class SecurityAutoConfiguration(
+    private val resolvers: ObjectProvider<AuthenticationResolver>
+) : WebMvcConfigurer {
 
     override fun addInterceptors(registry: InterceptorRegistry) {
-        registry.addInterceptor(SecurityInterceptor(properties))
+        registry.addInterceptor(SecurityInterceptor(resolvers))
             .excludePathPatterns(DEFAULT_EXCLUDE_PATH_PATTERNS)
     }
 
-    /**
-     * 默认排除的静态文件类型
-     */
+    @Bean
+    fun securityAspect(properties: SecurityProperties): SecurityAspect {
+        return SecurityAspect(properties)
+    }
+
     val DEFAULT_EXCLUDE_PATH_PATTERNS by lazy {
         listOf(
             "html",
