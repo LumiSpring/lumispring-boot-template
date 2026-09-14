@@ -15,9 +15,11 @@ import org.springframework.data.redis.core.ScanOptions
 import org.springframework.data.redis.core.ZSetOperations.TypedTuple
 import org.springframework.data.redis.core.script.DefaultRedisScript
 import org.springframework.scripting.ScriptSource
+import java.time.Duration
 import java.util.concurrent.TimeUnit
 
 
+@Suppress("UNCHECKED_CAST")
 val DEFAULT_REDIS_TEMPLATE: RedisTemplate<String, Any> by lazy {
     getBean("IRedisTemplate", RedisTemplate::class.java) as RedisTemplate<String, Any>
 }
@@ -44,7 +46,7 @@ class RedisClient() {
          * @param   timeUnit 时间单位
          */
         fun expire(key: String, timeout: Long, timeUnit: TimeUnit = TimeUnit.SECONDS) {
-            DEFAULT_REDIS_TEMPLATE.expire(key, timeout, timeUnit)
+            DEFAULT_REDIS_TEMPLATE.expire(key, Duration.of(timeout, timeUnit.toChronoUnit()))
         }
 
         /**
@@ -79,6 +81,14 @@ class RedisClient() {
          */
         fun exists(key: String): Boolean {
             return DEFAULT_REDIS_TEMPLATE.hasKey(key).isTrue()
+        }
+
+        /**
+         * 按模式匹配 key
+         * @param   pattern 匹配模式
+         */
+        fun keys(pattern: String): Set<String> {
+            return DEFAULT_REDIS_TEMPLATE.keys(pattern) ?: emptySet()
         }
 
         /**
@@ -192,7 +202,11 @@ class RedisClient() {
          * @param   timeUnit 时间单位，默认秒
          */
         fun set(key: String, value: Any, timeout: Long = -1L, timeUnit: TimeUnit = TimeUnit.SECONDS) {
-            DEFAULT_REDIS_TEMPLATE.opsForValue().set(key, value, timeout, timeUnit)
+            if (timeout < 0) {
+                DEFAULT_REDIS_TEMPLATE.opsForValue().set(key, value)
+            } else {
+                DEFAULT_REDIS_TEMPLATE.opsForValue().set(key, value, Duration.of(timeout, timeUnit.toChronoUnit()))
+            }
         }
 
         /**
@@ -211,7 +225,11 @@ class RedisClient() {
          * @param   timeUnit 时间单位，默认秒
          */
         fun setNx(key: String, value: Any, timeout: Long = -1L, timeUnit: TimeUnit = TimeUnit.SECONDS): Boolean {
-            return DEFAULT_REDIS_TEMPLATE.opsForValue().setIfAbsent(key, value, timeout, timeUnit)!!
+            return if (timeout < 0) {
+                DEFAULT_REDIS_TEMPLATE.opsForValue().setIfAbsent(key, value)!!
+            } else {
+                DEFAULT_REDIS_TEMPLATE.opsForValue().setIfAbsent(key, value, Duration.of(timeout, timeUnit.toChronoUnit()))!!
+            }
         }
 
         /**

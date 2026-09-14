@@ -23,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional
  * 权限服务实现类
  */
 @Service
-@Transactional(transactionManager = "securityTransactionManager")
+@Transactional
 class PermissionServiceImpl(
     private val permissionMapper: PermissionMapper,
     private val rolePermissionMapper: RolePermissionMapper,

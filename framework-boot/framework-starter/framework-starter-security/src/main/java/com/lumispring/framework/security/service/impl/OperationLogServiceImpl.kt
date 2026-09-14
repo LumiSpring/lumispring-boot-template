@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional
  * 操作日志服务实现类
  */
 @Service
-@Transactional(transactionManager = "securityTransactionManager")
+@Transactional
 class OperationLogServiceImpl(
     private val operationLogMapper: OperationLogMapper
 ) : ServiceImpl<OperationLogMapper, SysOperationLog>(), OperationLogService {

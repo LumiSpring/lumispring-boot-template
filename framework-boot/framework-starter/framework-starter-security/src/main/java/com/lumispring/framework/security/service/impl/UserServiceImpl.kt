@@ -14,6 +14,7 @@ import com.lumispring.framework.base.extension.toObject
 import com.lumispring.framework.base.extension.toTimestamp
 import com.lumispring.framework.base.model.BusinessException
 import com.lumispring.framework.base.model.ErrorCode
+import com.lumispring.framework.database.redis.core.RedisClient
 import com.lumispring.framework.security.config.SecurityProperties
 import com.lumispring.framework.security.config.SecurityRedisKeyConst
 import com.lumispring.framework.security.extension.currentToken
@@ -37,25 +38,20 @@ import com.lumispring.framework.web.extension.reqGetIp
 import com.lumispring.framework.web.extension.reqGetReferer
 import com.lumispring.framework.web.extension.reqGetUserAgent
 import com.lumispring.framework.web.extension.resAddCookie
-import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
-import java.util.concurrent.TimeUnit
 
 /**
  * 用户服务实现类
  */
 @Service
-@Transactional(transactionManager = "securityTransactionManager")
+@Transactional
 class UserServiceImpl(
     private val userMapper: UserMapper,
     private val roleMapper: RoleMapper,
     private val userRoleMapper: UserRoleMapper,
     private val operationLogService: OperationLogService,
-    @Qualifier("securityRedisTemplate")
-    private val redisTemplate: RedisTemplate<String, String>,
     private val securityProperties: SecurityProperties
 ) : ServiceImpl<UserMapper, SysUser>(), UserService {
 
@@ -74,7 +70,7 @@ class UserServiceImpl(
     private fun generateToken(userVO: UserVO): String {
         while (true) {
             val token = "${userVO.toJsonString().md5()}${randomUuid()}"
-            if (!redisTemplate.hasKey(buildUserTokenRedisKey(token))) return token
+            if (!RedisClient.exists(buildUserTokenRedisKey(token))) return token
         }
     }
 
@@ -180,17 +176,17 @@ class UserServiceImpl(
     override fun logout() {
         if (currentUserId().isNotNullOrEmpty()) {
             val token = currentToken()!!
-            redisTemplate.delete(buildUserTokenRedisKey(token))
-            redisTemplate.opsForZSet().remove(buildUserTokensZSetRedisKey(currentUserId()!!), token)
+            RedisClient.del(buildUserTokenRedisKey(token))
+            RedisClient.zRem(buildUserTokensZSetRedisKey(currentUserId()!!), token)
             // 获取登录记录并修改登出时间
             val loginRecordKey = buildUserLoginRecordRedisKey(currentUserId()!!, token)
-            val loginRecord = redisTemplate.opsForValue().get(loginRecordKey)?.toObject<LoginRecordDTO>()
+            val loginRecord = RedisClient.get<LoginRecordDTO>(loginRecordKey)
             LocalDateTime.now().let {
                 loginRecord?.logoutTime = it.format()
                 loginRecord?.logoutTimestamp = it.toTimestamp()
             }
             loginRecord?.let {
-                redisTemplate.opsForValue().set(loginRecordKey, loginRecord.toJsonString())
+                RedisClient.set(loginRecordKey, it)
             }
         }
     }
@@ -203,7 +199,7 @@ class UserServiceImpl(
 
     override fun refreshToken(expire: Long?, refreshToken: String?): TokenVO {
         refreshToken.checkNotNullOrEmpty("token不能为空", ErrorCode.USER_LOGIN_ERROR)
-        val userVo = redisTemplate.opsForValue().get(buildUserTokenRedisKey(refreshToken)).toObject<UserVO>()
+        val userVo = RedisClient.get<UserVO>(buildUserTokenRedisKey(refreshToken))
         userVo.checkNotNullOrEmpty("用户信息不存在或已过期", ErrorCode.USER_LOGIN_ERROR)
 
         recordUserCache(userVo, refreshToken, expire)
@@ -242,24 +238,23 @@ class UserServiceImpl(
         val expireTime = now.plusSeconds(expire ?: securityProperties.timeout)
 
         // 记录用户Token缓存中的用户信息
-        redisTemplate.opsForValue().set(
+        RedisClient.set(
             buildUserTokenRedisKey(token),
-            userVo.toJsonString(),
-            expire ?: securityProperties.timeout,
-            TimeUnit.SECONDS
+            userVo,
+            expire ?: securityProperties.timeout
         )
 
         // 查看该Token是否已存在登录记录
         val loginRecordKey = buildUserLoginRecordRedisKey(userVo.id!!, token)
-        val loginRecord = redisTemplate.opsForValue().get(loginRecordKey)?.toObject<LoginRecordDTO>()
+        val loginRecord = RedisClient.get<LoginRecordDTO>(loginRecordKey)
         if (loginRecord.isNotNullOrEmpty()) {
             // 已有记录，更新一下过期时间
             loginRecord.expireTimestamp = expireTime.toTimestamp()
             loginRecord.expireTime = expireTime.format()
-            redisTemplate.opsForValue().set(loginRecordKey, loginRecord.toJsonString())
+            RedisClient.set(loginRecordKey, loginRecord)
         } else {
             // 没有记录，则记录用户登录Token的设备信息
-            redisTemplate.opsForValue().set(
+            RedisClient.set(
                 buildUserLoginRecordRedisKey(userVo.id, token),
                 LoginRecordDTO(
                     userId = userVo.id,
@@ -272,11 +267,11 @@ class UserServiceImpl(
                     headers = reqGetHeaders(),
                     expireTimestamp = expireTime.toTimestamp(),
                     expireTime = expireTime.format(),
-                ).toJsonString()
+                )
             )
         }
         // 记录用户Token到ZSet
-        redisTemplate.opsForZSet().add(buildUserTokensZSetRedisKey(userVo.id), token, expireTime.toTimestamp().toDouble())
+        RedisClient.zAdd(buildUserTokensZSetRedisKey(userVo.id), token, expireTime.toTimestamp().toDouble())
     }
 
     override fun refreshUserCache(userId: Long) : UserVO {
@@ -289,8 +284,12 @@ class UserServiceImpl(
         // 更新用户所有Token缓存中的用户信息
         tokens.forEach { token->
             val key = buildUserTokenRedisKey(token)
-            val expire = redisTemplate.getExpire(key, TimeUnit.SECONDS)
-            redisTemplate.opsForValue().set(key, userVo.toJsonString(), expire, TimeUnit.SECONDS)
+            val expire = RedisClient.ttl(key) ?: -1
+            if (expire > 0) {
+                RedisClient.set(key, userVo, expire)
+            } else {
+                RedisClient.set(key, userVo)
+            }
         }
 
         return userVo
@@ -300,18 +299,18 @@ class UserServiceImpl(
         val tokens = getUserAvailableTokens(userId)
         if (tokens.isEmpty()) return true
         tokens.forEach { token->
-            redisTemplate.delete(buildUserTokenRedisKey(token))
-            redisTemplate.opsForZSet().remove(buildUserTokensZSetRedisKey(userId), token)
+            RedisClient.del(buildUserTokenRedisKey(token))
+            RedisClient.zRem(buildUserTokensZSetRedisKey(userId), token)
         }
         return true
     }
 
     override fun cleanTokenCache(token: String) {
-        val userVo = redisTemplate.opsForValue().get(buildUserTokenRedisKey(token))?.toObject<UserVO>()
+        val userVo = RedisClient.get<UserVO>(buildUserTokenRedisKey(token))
         userVo?.let {
-            redisTemplate.opsForZSet().remove(buildUserTokensZSetRedisKey(it.id!!), token)
+            RedisClient.zRem(buildUserTokensZSetRedisKey(it.id!!), token)
         }
-        redisTemplate.delete(buildUserTokenRedisKey(token))
+        RedisClient.del(buildUserTokenRedisKey(token))
     }
 
     override fun updateUser(updateDTO: UserUpdateDTO): UserVO {
@@ -549,9 +548,9 @@ class UserServiceImpl(
     override fun getLoginRecords(userId: Long?): UserLoginRecordsDTO {
         if (userId == null) throw ErrorCode.USER_LOGIN_NOT_EXIST_ERROR.exception()
         val user = getUserById(userId) ?: throw ErrorCode.USER_LOGIN_NOT_EXIST_ERROR.exception()
-        val redisKeys = redisTemplate.keys("${SecurityRedisKeyConst.USER_LOGIN_RECORDS}:${userId}:*")
+        val redisKeys = RedisClient.keys("${SecurityRedisKeyConst.USER_LOGIN_RECORDS}:${userId}:*")
         val records = redisKeys.associateWith { key ->
-            redisTemplate.opsForValue().get(key)?.toObject<LoginRecordDTO>()
+            RedisClient.get<LoginRecordDTO>(key)
         }
         return UserLoginRecordsDTO(
             userId = userId,
@@ -562,11 +561,13 @@ class UserServiceImpl(
 
     override fun getUserAvailableTokens(userId: Long?): Set<String> {
         if (userId == null) throw ErrorCode.USER_LOGIN_NOT_EXIST_ERROR.exception()
-        val tokens = redisTemplate.opsForZSet().rangeByScore(buildUserTokensZSetRedisKey(userId), LocalDateTime.now().toTimestamp().toDouble(), Double.MAX_VALUE) ?: emptySet()
+        val tokens = RedisClient.zRangeByScore<String>(
+            buildUserTokensZSetRedisKey(userId),
+            LocalDateTime.now().toTimestamp().toDouble(),
+            Double.MAX_VALUE
+        )
         return tokens.filter { token->
-            // 如果不存在，则说明已经登出了
-            // 需要过滤出尚未登出的Token
-            redisTemplate.hasKey(buildUserTokenRedisKey(token))
+            RedisClient.exists(buildUserTokenRedisKey(token))
         }.toSet()
     }
 

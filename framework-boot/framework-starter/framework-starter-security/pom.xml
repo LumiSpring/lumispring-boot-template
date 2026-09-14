@@ -33,12 +33,6 @@
             <artifactId>framework-starter-database-redis</artifactId>
         </dependency>
 
-        <!-- 数据库连接池 -->
-        <dependency>
-            <groupId>com.zaxxer</groupId>
-            <artifactId>HikariCP</artifactId>
-        </dependency>
-
         <!-- 密码加密 -->
         <dependency>
             <groupId>cn.hutool</groupId>

@@ -119,7 +119,7 @@ security:
   enabled: false
 ```
 
-When enabling it, configure a default Spring `DataSource` and `StringRedisTemplate`, then initialize the schema shipped at `framework-starter-security/src/main/resources/db/schema.sql`. The current implementation supports optional independent connections at `spring.datasource.security.*` and `security.redis.*`, but still requires default application data source and Redis beans.
+When enabling it, configure a default Spring `DataSource` and Redis, then initialize the schema shipped at `framework-starter-security/src/main/resources/db/schema.sql`. Security reuses those default beans; there is no independent `spring.datasource.security.*` or `security.redis.*` connection.
 
 Shared infrastructure example:
 

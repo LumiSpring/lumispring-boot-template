@@ -6,13 +6,11 @@ import org.apache.ibatis.annotations.Delete
 import org.apache.ibatis.annotations.Mapper
 import org.apache.ibatis.annotations.Param
 import org.apache.ibatis.annotations.Select
-import org.springframework.transaction.annotation.Transactional
 
 /**
  * 用户角色关联数据访问层
  */
 @Mapper
-@Transactional(transactionManager = "securityTransactionManager")
 interface UserRoleMapper : BaseMapper<SysUserRole> {
 
     /**

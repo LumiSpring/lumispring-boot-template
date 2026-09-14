@@ -5,13 +5,11 @@ import com.lumispring.framework.security.model.entity.SysPermission
 import org.apache.ibatis.annotations.Mapper
 import org.apache.ibatis.annotations.Param
 import org.apache.ibatis.annotations.Select
-import org.springframework.transaction.annotation.Transactional
 
 /**
  * 权限数据访问层
  */
 @Mapper
-@Transactional(transactionManager = "securityTransactionManager")
 interface PermissionMapper : BaseMapper<SysPermission> {
 
     /**

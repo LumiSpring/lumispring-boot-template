@@ -1,22 +1,17 @@
 package com.lumispring.framework.security.config
 
-import com.lumispring.framework.base.extension.toObject
+import com.lumispring.framework.database.redis.core.RedisClient
 import com.lumispring.framework.security.extension.setCurrentUser
 import com.lumispring.framework.security.model.vo.UserVO
-import com.lumispring.framework.security.service.UserService
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
-import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.data.redis.core.RedisTemplate
-import org.springframework.stereotype.Component
 import org.springframework.web.servlet.HandlerInterceptor
 
 /**
  * 安全拦截器
  */
 class SecurityInterceptor(
-    private val properties: SecurityProperties,
-    private val redisTemplate: RedisTemplate<String, String>
+    private val properties: SecurityProperties
 ) : HandlerInterceptor {
 
     /**
@@ -38,7 +33,7 @@ class SecurityInterceptor(
             ?: request.cookies?.firstOrNull { it.name == "token" }?.value
 
         if (!token.isNullOrBlank()){
-            val userVo = redisTemplate.opsForValue().get("${SecurityRedisKeyConst.USER_INFO_BY_TOKEN_PREFIX}:${token}").toObject<UserVO>()
+            val userVo = RedisClient.get<UserVO>("${SecurityRedisKeyConst.USER_INFO_BY_TOKEN_PREFIX}:${token}")
             userVo?.let {
                 it.token = token
                 setCurrentUser(it)

@@ -73,7 +73,7 @@ The security Starter is enabled when `security.enabled` is absent. Keep it disab
 - initialize `framework-starter-security/src/main/resources/db/schema.sql` deliberately;
 - inspect the local schema and replace or remove its development seed administrator before the first externally reachable startup; never repeat the seed password in generated public documentation;
 - do not configure the API-key bypass unless the user explicitly needs it;
-- note that the current implementation still expects the application's default data source and Redis beans even when independent security connections are configured.
+- note that Security reuses the application's default DataSource and Redis; do not configure `spring.datasource.security.*` or `security.redis.*`.
 
 ## Verify the result
 

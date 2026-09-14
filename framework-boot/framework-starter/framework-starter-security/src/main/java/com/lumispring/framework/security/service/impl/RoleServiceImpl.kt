@@ -15,8 +15,6 @@ import com.lumispring.framework.security.service.RoleService
 import com.lumispring.framework.security.service.OperationLogService
 import com.lumispring.framework.security.service.UserService
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
@@ -25,13 +23,11 @@ import java.time.LocalDateTime
  * 角色服务实现类
  */
 @Service
-@Transactional(transactionManager = "securityTransactionManager")
+@Transactional
 class RoleServiceImpl(
     private val roleMapper: RoleMapper,
     private val userRoleMapper: UserRoleMapper,
     private val operationLogService: OperationLogService,
-    @Qualifier("securityRedisTemplate")
-    private val redisTemplate: RedisTemplate<String, String>,
 ) : ServiceImpl<RoleMapper, SysRole>(), RoleService {
 
     @Autowired
