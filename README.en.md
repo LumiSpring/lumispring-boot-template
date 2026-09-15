@@ -111,7 +111,7 @@ security:
   enabled: false
 ```
 
-Before enabling the bundled RBAC, provide a default `DataSource` and Redis, then apply `framework-starter-security-rbac/src/main/resources/db/schema.sql`. The bundled administrator is for local development only. Replace or remove it before any reachable deployment, and do not publish the seed password. If you only need the annotations and will implement login yourself, depend on `framework-starter-security` and provide an `AuthenticationResolver`.
+Before enabling the bundled RBAC, provide a default `DataSource` and Redis. On startup the starter creates any missing `sys_*` tables and seeds built-in roles plus a development administrator when those tables are empty. Set `security.rbac.schema-init.enabled: false` to opt out. The bundled administrator is for local development only. Replace or remove it before any reachable deployment, and do not publish the seed password. If you only need the annotations and will implement login yourself, depend on `framework-starter-security` and provide an `AuthenticationResolver`.
 
 OpenAPI UI is available at `/swagger-ui.html` by default.
 

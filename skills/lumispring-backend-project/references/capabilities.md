@@ -128,7 +128,7 @@ security:
   enabled: false
 ```
 
-When using the RBAC starter, configure a default Spring `DataSource` and Redis, then initialize the schema shipped at `framework-starter-security-rbac/src/main/resources/db/schema.sql`. RBAC reuses those default beans.
+When using the RBAC starter, configure a default Spring `DataSource` and Redis. On startup the starter checks for `sys_user` / `sys_role` / permission tables and creates any that are missing, then seeds built-in roles and a development administrator when those tables are empty. Disable with `security.rbac.schema-init.enabled: false` (and `security.rbac.schema-init.seed: false` to skip seed data). The same scripts remain at `db/schema.sql` and `db/data.sql` for manual execution. RBAC reuses the default DataSource and Redis beans.
 
 To keep the annotations but supply your own login, depend only on `framework-starter-security` and register an `AuthenticationResolver`. Put the business user object on `AuthPrincipal.userDetails` and read it with `currentUser<YourUserVO>()` or `principal.asUser(YourUserVO::class)`.
 
@@ -140,6 +140,10 @@ security:
   timeout: 604800
   api-header: security-key
   # api-key: ${SECURITY_API_KEY} # omit unless a trusted bypass is explicitly required
+  rbac:
+    schema-init:
+      enabled: true
+      seed: true
 ```
 
 Use these annotations:

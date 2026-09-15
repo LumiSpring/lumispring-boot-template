@@ -20,7 +20,7 @@ import org.springframework.context.annotation.Configuration
     ]
 )
 @MapperScan("com.lumispring.framework.security.mapper")
-@AutoConfigureAfter(SecurityAutoConfiguration::class)
+@AutoConfigureAfter(SecurityAutoConfiguration::class, RbacSchemaAutoConfiguration::class)
 @ConditionalOnProperty(name = ["security.enabled"], havingValue = "true", matchIfMissing = true)
 class SecurityRbacAutoConfiguration {
 

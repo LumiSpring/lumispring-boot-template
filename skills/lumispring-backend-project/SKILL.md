@@ -71,8 +71,8 @@ Use framework APIs rather than recreating them. Typical imports and configuratio
 The security kernel is enabled when `security.enabled` is absent. Keep it disabled until the application is ready. For built-in RBAC (`framework-starter-security-rbac`), also wait until you have a working `DataSource`, Redis, and initialized security schema. When enabling RBAC:
 
 - configure secrets through environment variables or a secret manager;
-- initialize `framework-starter-security-rbac/src/main/resources/db/schema.sql` deliberately;
-- inspect the local schema and replace or remove its development seed administrator before the first externally reachable startup; never repeat the seed password in generated public documentation;
+- let the RBAC starter create missing tables on startup, or disable `security.rbac.schema-init.enabled` and apply `db/schema.sql` plus `db/data.sql` yourself;
+- inspect the local schema and replace or remove the seed administrator before the first externally reachable startup; never repeat the seed password in generated public documentation;
 - do not configure the API-key bypass unless the user explicitly needs it;
 - note that RBAC reuses the application's default DataSource and Redis.
 

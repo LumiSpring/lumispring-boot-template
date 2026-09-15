@@ -111,7 +111,7 @@ security:
   enabled: false
 ```
 
-启用内置 RBAC 前请准备好默认数据源和 Redis，并执行 `framework-starter-security-rbac/src/main/resources/db/schema.sql`。内置管理员账号仅供本地开发，上线前必须替换或删除，不要把种子密码写进公开文档。只需要注解、登录自己实现时，依赖 `framework-starter-security` 并提供 `AuthenticationResolver` 即可。
+启用内置 RBAC 前请准备好默认数据源和 Redis。启动时会检测 `sys_user`、`sys_role` 等表，缺失则自动建表，空表时写入内置角色/权限和开发管理员。可用 `security.rbac.schema-init.enabled: false` 关闭自动建表。内置管理员仅供本地开发，上线前必须替换或删除，不要把种子密码写进公开文档。只需要注解、登录自己实现时，依赖 `framework-starter-security` 并提供 `AuthenticationResolver` 即可。
 
 OpenAPI 文档默认在 `/swagger-ui.html`。
 

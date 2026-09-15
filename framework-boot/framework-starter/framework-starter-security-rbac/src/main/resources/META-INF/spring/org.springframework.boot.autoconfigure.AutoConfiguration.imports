@@ -1,1 +1,2 @@
+com.lumispring.framework.security.rbac.RbacSchemaAutoConfiguration
 com.lumispring.framework.security.rbac.SecurityRbacAutoConfiguration
