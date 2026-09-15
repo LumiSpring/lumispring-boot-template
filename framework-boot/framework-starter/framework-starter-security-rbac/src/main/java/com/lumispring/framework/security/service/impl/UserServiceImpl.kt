@@ -6,13 +6,10 @@ import com.baomidou.mybatisplus.spring.service.impl.ServiceImpl
 import com.lumispring.framework.base.extension.checkNotNullOrEmpty
 import com.lumispring.framework.base.extension.format
 import com.lumispring.framework.base.extension.isNotNullOrEmpty
-import com.lumispring.framework.base.extension.md5
 import com.lumispring.framework.base.extension.randomUuid
 import com.lumispring.framework.base.extension.throwIf
-import com.lumispring.framework.base.extension.toJsonString
 import com.lumispring.framework.base.extension.toObject
 import com.lumispring.framework.base.extension.toTimestamp
-import com.lumispring.framework.base.model.BusinessException
 import com.lumispring.framework.base.model.ErrorCode
 import com.lumispring.framework.database.redis.core.RedisClient
 import com.lumispring.framework.security.config.SecurityProperties
@@ -21,9 +18,12 @@ import com.lumispring.framework.security.extension.currentToken
 import com.lumispring.framework.security.extension.currentUser
 import com.lumispring.framework.security.extension.currentUserId
 import com.lumispring.framework.security.extension.isAdmin
+import com.lumispring.framework.security.mapper.PermissionMapper
 import com.lumispring.framework.security.mapper.RoleMapper
 import com.lumispring.framework.security.mapper.UserMapper
+import com.lumispring.framework.security.mapper.UserPermissionMapper
 import com.lumispring.framework.security.mapper.UserRoleMapper
+import com.lumispring.framework.security.model.AuthSession
 import com.lumispring.framework.security.model.dto.*
 import com.lumispring.framework.security.model.entity.SysRole
 import com.lumispring.framework.security.model.entity.SysOperationLog
@@ -46,11 +46,12 @@ import java.time.LocalDateTime
  * 用户服务实现类
  */
 @Service
-@Transactional
 class UserServiceImpl(
     private val userMapper: UserMapper,
     private val roleMapper: RoleMapper,
     private val userRoleMapper: UserRoleMapper,
+    private val userPermissionMapper: UserPermissionMapper,
+    private val permissionMapper: PermissionMapper,
     private val operationLogService: OperationLogService,
     private val securityProperties: SecurityProperties
 ) : ServiceImpl<UserMapper, SysUser>(), UserService {
@@ -67,19 +68,38 @@ class UserServiceImpl(
         return "${SecurityRedisKeyConst.USER_LOGIN_TOKENS_ZSET}:${userId}"
     }
 
-    private fun generateToken(userVO: UserVO): String {
+    private fun generateToken(): String {
         while (true) {
-            val token = "${userVO.toJsonString().md5()}${randomUuid()}"
+            val token = randomUuid()
             if (!RedisClient.exists(buildUserTokenRedisKey(token))) return token
         }
     }
 
+    /**
+     * 根据账号查找用户，允许用户名、邮箱或手机号登录
+     */
+    private fun findUserByAccount(account: String): SysUser? {
+        return userMapper.selectOne(KtQueryWrapper(SysUser::class.java).eq(SysUser::username, account))
+            ?: userMapper.selectOne(KtQueryWrapper(SysUser::class.java).eq(SysUser::email, account))
+            ?: userMapper.selectOne(KtQueryWrapper(SysUser::class.java).eq(SysUser::phone, account))
+    }
+
+    private fun hasAdminRole(userId: Long): Boolean {
+        return userRoleMapper.selectRoleCodesByUserId(userId).contains(SysRole.ROLE_ADMIN)
+    }
+
+    private fun hasOtherEnabledAdmin(excludeUserId: Long): Boolean {
+        val adminRole = roleMapper.selectByRoleCode(SysRole.ROLE_ADMIN) ?: return false
+        val adminRoleId = adminRole.id ?: return false
+        return userRoleMapper.selectUserIdsByRoleId(adminRoleId)
+            .filter { it != excludeUserId }
+            .any { userId -> userMapper.selectById(userId)?.isEnabled() == true }
+    }
+
     override fun login(loginDTO: LoginDTO, expire: Long?): TokenVO {
-        // 1. 查询用户
-        val sysUser = userMapper.selectOne(
-            KtQueryWrapper(SysUser::class.java)
-                .eq(SysUser::username, loginDTO.username)
-        ) ?: throw ErrorCode.USER_LOGIN_NOT_EXIST_ERROR.exception()
+        // 1. 校验用户账号是否存在
+        val sysUser = findUserByAccount(loginDTO.username)
+            ?: throw ErrorCode.USER_LOGIN_NOT_EXIST_ERROR.exception()
 
         // 2. 校验用户状态
         if (!sysUser.isEnabled()) {
@@ -93,22 +113,21 @@ class UserServiceImpl(
 
         // 4. 登录并生成Token
         val userVo = convertToVO(sysUser)
-        val token = generateToken(userVo)
+        val token = generateToken()
+        val ttl = expire ?: securityProperties.timeout
 
-        // 5. 将用户信息存入到Redis中
-        recordUserCache(userVo, token)
+        recordUserCache(userVo, token, ttl)
+        resAddCookie("token", token, ttl.toInt())
 
-        resAddCookie(token, token, securityProperties.timeout.toInt())
-
-        // 6. 返回Token信息
         return TokenVO(
             accessToken = token,
             tokenType = "Bearer",
-            expiresIn = securityProperties.timeout,
+            expiresIn = ttl,
             userInfo = userVo
         )
     }
 
+    @Transactional(rollbackFor = [Exception::class])
     override fun create(userDto: UserCreateDTO): UserVO {
         // 校验用户名是否已存在
         if (checkUsernameExists(userDto.username)) {
@@ -149,19 +168,25 @@ class UserServiceImpl(
                     .`in`(SysRole::roleCode, userDto.roles)
             )
 
-            userRoleMapper.insert(roles.map {
-                SysUserRole(
-                    userId = sysUser.id,
-                    roleId = it.id,
-                    createTime = LocalDateTime.now()
+            roles.forEach {
+                userRoleMapper.insert(
+                    SysUserRole(
+                        userId = sysUser.id,
+                        roleId = it.id,
+                        createTime = LocalDateTime.now()
+                    )
                 )
-            })
+            }
         }
 
         return convertToVO(sysUser)
     }
 
+    @Transactional(rollbackFor = [Exception::class])
     override fun register(registerDTO: RegisterDTO): TokenVO {
+        if (registerDTO.password != registerDTO.confirmPassword) {
+            throw ErrorCode.USER_REGISTER_ERROR.exception("两次输入的密码不一致")
+        }
         val userCreateDto = registerDTO.toObject<UserCreateDTO>() ?: throw ErrorCode.USER_REGISTER_ERROR.exception("注册信息转换失败")
         // 为新用户分配默认角色
         userCreateDto.roles = listOf(SysRole.ROLE_USER)
@@ -176,17 +201,17 @@ class UserServiceImpl(
     override fun logout() {
         if (currentUserId().isNotNullOrEmpty()) {
             val token = currentToken()!!
-            RedisClient.del(buildUserTokenRedisKey(token))
-            RedisClient.zRem(buildUserTokensZSetRedisKey(currentUserId()!!), token)
-            // 获取登录记录并修改登出时间
-            val loginRecordKey = buildUserLoginRecordRedisKey(currentUserId()!!, token)
+            val userId = currentUserId()!!
+            val loginRecordKey = buildUserLoginRecordRedisKey(userId, token)
             val loginRecord = RedisClient.get<LoginRecordDTO>(loginRecordKey)
+            RedisClient.del(buildUserTokenRedisKey(token))
+            RedisClient.zRem(buildUserTokensZSetRedisKey(userId), token)
             LocalDateTime.now().let {
                 loginRecord?.logoutTime = it.format()
                 loginRecord?.logoutTimestamp = it.toTimestamp()
             }
             loginRecord?.let {
-                RedisClient.set(loginRecordKey, it)
+                RedisClient.set(loginRecordKey, it, securityProperties.timeout)
             }
         }
     }
@@ -199,8 +224,14 @@ class UserServiceImpl(
 
     override fun refreshToken(expire: Long?, refreshToken: String?): TokenVO {
         refreshToken.checkNotNullOrEmpty("token不能为空", ErrorCode.USER_LOGIN_ERROR)
-        val userVo = RedisClient.get<UserVO>(buildUserTokenRedisKey(refreshToken))
-        userVo.checkNotNullOrEmpty("用户信息不存在或已过期", ErrorCode.USER_LOGIN_ERROR)
+        val session = RedisClient.get<AuthSession>(buildUserTokenRedisKey(refreshToken))
+        session.checkNotNullOrEmpty("用户信息不存在或已过期", ErrorCode.USER_LOGIN_ERROR)
+        val userVo = getUserById(session.id)
+            ?: throw ErrorCode.USER_LOGIN_NOT_EXIST_ERROR.exception()
+        if (!userVo.isEnabled()) {
+            cleanTokenCache(refreshToken)
+            throw ErrorCode.USER_LOGIN_ERROR.exception("用户已被禁用")
+        }
 
         recordUserCache(userVo, refreshToken, expire)
 
@@ -235,27 +266,21 @@ class UserServiceImpl(
 
     override fun recordUserCache(userVo: UserVO, token: String, expire: Long?) {
         val now = LocalDateTime.now()
-        val expireTime = now.plusSeconds(expire ?: securityProperties.timeout)
+        val ttl = expire ?: securityProperties.timeout
+        val expireTime = now.plusSeconds(ttl)
+        val session = AuthSession.from(userVo, token)
 
-        // 记录用户Token缓存中的用户信息
-        RedisClient.set(
-            buildUserTokenRedisKey(token),
-            userVo,
-            expire ?: securityProperties.timeout
-        )
+        RedisClient.set(buildUserTokenRedisKey(token), session, ttl)
 
-        // 查看该Token是否已存在登录记录
         val loginRecordKey = buildUserLoginRecordRedisKey(userVo.id!!, token)
         val loginRecord = RedisClient.get<LoginRecordDTO>(loginRecordKey)
         if (loginRecord.isNotNullOrEmpty()) {
-            // 已有记录，更新一下过期时间
             loginRecord.expireTimestamp = expireTime.toTimestamp()
             loginRecord.expireTime = expireTime.format()
-            RedisClient.set(loginRecordKey, loginRecord)
+            RedisClient.set(loginRecordKey, loginRecord, ttl)
         } else {
-            // 没有记录，则记录用户登录Token的设备信息
             RedisClient.set(
-                buildUserLoginRecordRedisKey(userVo.id, token),
+                loginRecordKey,
                 LoginRecordDTO(
                     userId = userVo.id,
                     token = token,
@@ -267,28 +292,26 @@ class UserServiceImpl(
                     headers = reqGetHeaders(),
                     expireTimestamp = expireTime.toTimestamp(),
                     expireTime = expireTime.format(),
-                )
+                ),
+                ttl
             )
         }
-        // 记录用户Token到ZSet
         RedisClient.zAdd(buildUserTokensZSetRedisKey(userVo.id), token, expireTime.toTimestamp().toDouble())
     }
 
-    override fun refreshUserCache(userId: Long) : UserVO {
+    override fun refreshUserCache(userId: Long): UserVO {
         val userVo = getUserById(userId)
             ?: throw ErrorCode.USER_LOGIN_NOT_EXIST_ERROR.exception()
 
-        // 获取用户所有可用Token
         val tokens = getUserAvailableTokens(userId)
-
-        // 更新用户所有Token缓存中的用户信息
-        tokens.forEach { token->
+        tokens.forEach { token ->
             val key = buildUserTokenRedisKey(token)
-            val expire = RedisClient.ttl(key) ?: -1
-            if (expire > 0) {
-                RedisClient.set(key, userVo, expire)
+            val ttl = RedisClient.ttl(key) ?: -1
+            val session = AuthSession.from(userVo, token)
+            if (ttl > 0) {
+                RedisClient.set(key, session, ttl)
             } else {
-                RedisClient.set(key, userVo)
+                RedisClient.set(key, session)
             }
         }
 
@@ -297,22 +320,23 @@ class UserServiceImpl(
 
     override fun cleanUserCache(userId: Long): Boolean {
         val tokens = getUserAvailableTokens(userId)
-        if (tokens.isEmpty()) return true
-        tokens.forEach { token->
+        tokens.forEach { token ->
             RedisClient.del(buildUserTokenRedisKey(token))
-            RedisClient.zRem(buildUserTokensZSetRedisKey(userId), token)
+            RedisClient.del(buildUserLoginRecordRedisKey(userId, token))
         }
+        RedisClient.del(buildUserTokensZSetRedisKey(userId))
         return true
     }
 
     override fun cleanTokenCache(token: String) {
-        val userVo = RedisClient.get<UserVO>(buildUserTokenRedisKey(token))
-        userVo?.let {
-            RedisClient.zRem(buildUserTokensZSetRedisKey(it.id!!), token)
+        val session = RedisClient.get<AuthSession>(buildUserTokenRedisKey(token))
+        session?.let {
+            RedisClient.zRem(buildUserTokensZSetRedisKey(it.id), token)
         }
         RedisClient.del(buildUserTokenRedisKey(token))
     }
 
+    @Transactional(rollbackFor = [Exception::class])
     override fun updateUser(updateDTO: UserUpdateDTO): UserVO {
         throwIf(currentUserId() != updateDTO.userId && !isAdmin(), "无修改权限", errorCode = ErrorCode.AUTH_ERROR)
 
@@ -364,8 +388,10 @@ class UserServiceImpl(
         return refreshUserCache(userId)
     }
 
+    @Transactional(rollbackFor = [Exception::class])
     override fun updatePassword(passwordDTO: PasswordUpdateDTO) {
         val userId = passwordDTO.userId ?: currentUserId()!!
+        throwIf(userId != currentUserId() && !isAdmin(), "无修改权限", errorCode = ErrorCode.AUTH_ERROR)
 
         // 查询用户
         val user = userMapper.selectById(userId)
@@ -390,6 +416,39 @@ class UserServiceImpl(
             password = encryptedPassword
         )
         userMapper.updateById(updateUser)
+        operationLogService.log(
+            module = SysOperationLog.MODULE_USER,
+            action = SysOperationLog.ACTION_UPDATE,
+            targetId = userId,
+            targetName = user.username,
+            detail = mapOf("action" to "password")
+        )
+        cleanUserCache(userId)
+    }
+
+    @Transactional(rollbackFor = [Exception::class])
+    override fun resetPassword(userId: Long, passwordDTO: PasswordResetDTO) {
+        val user = userMapper.selectById(userId)
+            ?: throw ErrorCode.USER_LOGIN_NOT_EXIST_ERROR.exception()
+
+        if (passwordDTO.newPassword != passwordDTO.confirmPassword) {
+            throw ErrorCode.USER_REGISTER_ERROR.exception("两次输入的新密码不一致")
+        }
+
+        userMapper.updateById(
+            SysUser(
+                id = userId,
+                password = encryptPassword(passwordDTO.newPassword)
+            )
+        )
+        operationLogService.log(
+            module = SysOperationLog.MODULE_USER,
+            action = SysOperationLog.ACTION_UPDATE,
+            targetId = userId,
+            targetName = user.username,
+            detail = mapOf("action" to "reset-password")
+        )
+        cleanUserCache(userId)
     }
 
     override fun updateAvatar(userId: Long, avatarUrl: String): UserVO {
@@ -398,9 +457,7 @@ class UserServiceImpl(
             avatar = avatarUrl
         )
         userMapper.updateById(updateUser)
-
-        return getUserById(userId)
-            ?: throw ErrorCode.USER_LOGIN_NOT_EXIST_ERROR.exception()
+        return refreshUserCache(userId)
     }
 
     override fun checkUsernameExists(username: String): Boolean {
@@ -431,21 +488,21 @@ class UserServiceImpl(
         ) > 0
     }
 
+    @Transactional(rollbackFor = [Exception::class])
     override fun deleteUser(userId: Long) {
-        // 1. 查询用户是否存在
         val user = userMapper.selectById(userId)
             ?: throw ErrorCode.USER_LOGIN_NOT_EXIST_ERROR.exception()
 
-        // 2. 不能删除管理员用户（可选：根据业务需求调整）
-        if (user.isAdmin()) {
-            throw ErrorCode.AUTH_ERROR.exception("不能删除管理员用户")
+        if (userId == currentUserId()) {
+            throw ErrorCode.AUTH_ERROR.exception("不能删除当前登录用户")
         }
 
-        // 3. 删除用户角色关联
-        userRoleMapper.delete(
-            KtQueryWrapper(SysUserRole::class.java)
-                .eq(SysUserRole::userId, userId)
-        )
+        if (hasAdminRole(userId) && !hasOtherEnabledAdmin(userId)) {
+            throw ErrorCode.AUTH_ERROR.exception("不能删除最后一个管理员用户")
+        }
+
+        userRoleMapper.deleteByUserId(userId)
+        userPermissionMapper.deleteByUserId(userId)
 
         // 4. 记录操作日志（保存删除前的数据快照）
         operationLogService.log(
@@ -463,6 +520,7 @@ class UserServiceImpl(
         cleanUserCache(userId)
     }
 
+    @Transactional(rollbackFor = [Exception::class])
     override fun updateUserStatus(userId: Long, status: Int) {
         // 1. 校验状态值是否合法
         if (status != SysUser.STATUS_ENABLED && status != SysUser.STATUS_DISABLED) {
@@ -476,6 +534,10 @@ class UserServiceImpl(
         // 3. 不能禁用当前登录用户自己
         if (userId == currentUserId() && status == SysUser.STATUS_DISABLED) {
             throw ErrorCode.AUTH_ERROR.exception("不能禁用当前登录用户")
+        }
+
+        if (status == SysUser.STATUS_DISABLED && hasAdminRole(userId) && !hasOtherEnabledAdmin(userId)) {
+            throw ErrorCode.AUTH_ERROR.exception("不能禁用最后一个管理员")
         }
 
         // 4. 更新用户状态
@@ -492,49 +554,27 @@ class UserServiceImpl(
     }
 
     override fun listUsers(query: UserQueryDto): List<UserVO> {
-        // 构建查询条件
+        val roleUserIds = if (query.roles.isNotNullOrEmpty()) {
+            query.roles!!.flatMap { userRoleMapper.selectUserIdsByRoleCode(it) }.distinct()
+        } else {
+            null
+        }
+        if (roleUserIds != null && roleUserIds.isEmpty()) {
+            return emptyList()
+        }
+
         val queryWrapper = KtQueryWrapper(SysUser::class.java).apply {
-            // ID 精确查询
             query.id?.let { eq(SysUser::id, it) }
-
-            // 用户名模糊查询
-            query.username?.takeIf { it.isNotBlank() }?.let {
-                like(SysUser::username, "%$it%")
-            }
-
-            // 昵称模糊查询
-            query.nickName?.takeIf { it.isNotBlank() }?.let {
-                like(SysUser::nickname, "%$it%")
-            }
-
-            // 邮箱模糊查询
-            query.email?.takeIf { it.isNotBlank() }?.let {
-                like(SysUser::email, "%$it%")
-            }
-
-            // 手机号模糊查询
-            query.phone?.takeIf { it.isNotBlank() }?.let {
-                like(SysUser::phone, "%$it%")
-            }
-
-            // 状态精确查询
+            query.username?.takeIf { it.isNotBlank() }?.let { like(SysUser::username, it) }
+            query.nickName?.takeIf { it.isNotBlank() }?.let { like(SysUser::nickname, it) }
+            query.email?.takeIf { it.isNotBlank() }?.let { like(SysUser::email, it) }
+            query.phone?.takeIf { it.isNotBlank() }?.let { like(SysUser::phone, it) }
             query.status?.let { eq(SysUser::status, it) }
-
-            // 按创建时间倒序排列（最新的在前）
+            roleUserIds?.let { `in`(SysUser::id, it) }
             orderByDesc(SysUser::createTime)
         }
 
-        // 执行查询
-        val users = userMapper.selectList(queryWrapper)
-
-        // 如果指定了角色筛选，需要进一步过滤
-        return if (query.roles.isNotNullOrEmpty()) {
-            // 查询有指定角色的用户ID列表
-            val userIds = query.roles!!.map { userRoleMapper.selectUserIdsByRoleCode(it) }.flatten().distinct()
-            users.filter { it.id in userIds }.map { convertToVO(it) }
-        } else {
-            users.map { convertToVO(it) }
-        }
+        return userMapper.selectList(queryWrapper).map { convertToVO(it) }
     }
 
     override fun encryptPassword(password: String): String {
@@ -548,9 +588,10 @@ class UserServiceImpl(
     override fun getLoginRecords(userId: Long?): UserLoginRecordsDTO {
         if (userId == null) throw ErrorCode.USER_LOGIN_NOT_EXIST_ERROR.exception()
         val user = getUserById(userId) ?: throw ErrorCode.USER_LOGIN_NOT_EXIST_ERROR.exception()
-        val redisKeys = RedisClient.keys("${SecurityRedisKeyConst.USER_LOGIN_RECORDS}:${userId}:*")
-        val records = redisKeys.associateWith { key ->
-            RedisClient.get<LoginRecordDTO>(key)
+        val tokens = getUserAvailableTokens(userId)
+        val records = tokens.associate { token ->
+            val key = buildUserLoginRecordRedisKey(userId, token)
+            key to RedisClient.get<LoginRecordDTO>(key)
         }
         return UserLoginRecordsDTO(
             userId = userId,
@@ -575,8 +616,9 @@ class UserServiceImpl(
      * 转换为视图对象
      */
     private fun convertToVO(sysUser: SysUser): UserVO {
-        // 查询用户角色
-        val roles = sysUser.id?.let { userRoleMapper.selectRoleCodesByUserId(it) } ?: emptyList()
+        val userId = sysUser.id
+        val roles = userId?.let { userRoleMapper.selectRoleCodesByUserId(it) } ?: emptyList()
+        val permissions = userId?.let { permissionMapper.selectPermissionCodesByUserId(it) } ?: emptyList()
 
         return UserVO(
             id = sysUser.id,
@@ -588,6 +630,7 @@ class UserServiceImpl(
             status = sysUser.status,
             userType = sysUser.userType,
             roles = roles,
+            permissions = permissions,
             createTime = sysUser.createTime,
             updateTime = sysUser.updateTime
         )

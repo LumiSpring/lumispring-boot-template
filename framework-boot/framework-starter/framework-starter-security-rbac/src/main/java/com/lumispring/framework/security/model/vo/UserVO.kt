@@ -3,6 +3,7 @@ package com.lumispring.framework.security.model.vo
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonIgnore
 import tools.jackson.databind.annotation.JsonSerialize
+import com.lumispring.framework.security.model.entity.SysRole
 import com.lumispring.framework.security.serializer.PhoneMaskSerializer
 import java.time.LocalDateTime
 
@@ -52,9 +53,14 @@ data class UserVO(
     val userType: Int? = null,
 
     /**
-     * 角色列表
+     * 角色编码列表
      */
     val roles: List<String>? = null,
+
+    /**
+     * 权限编码列表（角色权限 + 用户直赋）
+     */
+    val permissions: List<String>? = null,
 
     /**
      * 令牌
@@ -80,7 +86,7 @@ data class UserVO(
     fun isEnabled(): Boolean = status == 1
 
     /**
-     * 是否管理员
+     * 是否管理员（以 admin 角色为准）
      */
-    fun isAdmin(): Boolean = userType == 2 || (roles?.contains("admin") == true)
+    fun isAdmin(): Boolean = roles?.contains(SysRole.ROLE_ADMIN) == true
 }

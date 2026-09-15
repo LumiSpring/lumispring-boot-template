@@ -39,4 +39,10 @@ interface RolePermissionMapper : BaseMapper<SysRolePermission> {
      */
     @Select("SELECT permission_id FROM sys_role_permission WHERE role_id = #{roleId}")
     fun selectPermissionIdsByRoleId(@Param("roleId") roleId: Long): List<Long>
+
+    /**
+     * 根据权限ID查询角色ID列表
+     */
+    @Select("SELECT role_id FROM sys_role_permission WHERE permission_id = #{permissionId}")
+    fun selectRoleIdsByPermissionId(@Param("permissionId") permissionId: Long): List<Long>
 }

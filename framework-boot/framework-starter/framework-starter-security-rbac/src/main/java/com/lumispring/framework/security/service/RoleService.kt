@@ -59,6 +59,11 @@ interface RoleService : IService<SysRole> {
     fun listAllEnabledRoles(): List<RoleVO>
 
     /**
+     * 查询全部角色（含禁用，供管理端）
+     */
+    fun listAllRoles(): List<RoleVO>
+
+    /**
      * 根据用户ID查询角色列表
      *
      * @param userId 用户ID

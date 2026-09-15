@@ -147,19 +147,22 @@ Use these annotations:
 ```kotlin
 import com.lumispring.framework.security.config.annotation.RequireAdmin
 import com.lumispring.framework.security.config.annotation.RequireLogin
+import com.lumispring.framework.security.config.annotation.RequirePermission
 import com.lumispring.framework.security.config.annotation.RequireRole
 import com.lumispring.framework.security.config.annotation.UnAuth
 ```
 
 - `@RequireLogin`: authenticated user required.
-- `@RequireAdmin`: administrator required.
+- `@RequireAdmin`: administrator required (`admin` role by default).
 - `@RequireRole("editor")`: any listed role by default.
 - `@RequireRole("editor", "reviewer", mode = RequireRole.RoleCheckMode.ALL)`: all listed roles required.
+- `@RequirePermission("user:create")`: any listed permission code by default. Administrators skip role and permission checks.
+- `@RequirePermission("user:get", "user:list", mode = RequirePermission.PermissionCheckMode.ALL)`: all listed permission codes required.
 - `@UnAuth`: bypass normal authentication for a public endpoint; use sparingly.
 
-Kernel helpers are in `com.lumispring.framework.security.auth`: `currentPrincipal`, `currentUser<T>()`, `currentUserId` (String), `currentUsername`, `currentRoles`, and `isAdmin`.
+Kernel helpers are in `com.lumispring.framework.security.auth`: `currentPrincipal`, `currentUser<T>()`, `currentUserId` (String), `currentUsername`, `currentRoles`, `currentPermissions`, and `isAdmin`.
 
-RBAC helpers remain in `com.lumispring.framework.security.extension`: `currentUser` returns `UserVO`, and `currentUserId` returns `Long`.
+RBAC helpers remain in `com.lumispring.framework.security.extension`: `currentUser` returns `UserVO`, and `currentUserId` returns `Long`. Built-in RBAC login writes an `AuthSession` snapshot (roles + permission codes) to Redis. Admin APIs are protected by `@RequirePermission`; users with the `admin` role still bypass those checks.
 
 Built-in RBAC endpoints include login/register/logout, user/password operations, and admin APIs for users, roles, and permissions. Treat registration openness and the API-key bypass as policies to review before production.
 

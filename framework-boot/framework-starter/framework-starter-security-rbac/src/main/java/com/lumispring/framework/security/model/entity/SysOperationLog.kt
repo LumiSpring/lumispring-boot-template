@@ -72,5 +72,6 @@ data class SysOperationLog(
         const val ACTION_CREATE = "create"
         const val ACTION_UPDATE = "update"
         const val ACTION_DELETE = "delete"
+        const val ACTION_ASSIGN = "assign"
     }
 }

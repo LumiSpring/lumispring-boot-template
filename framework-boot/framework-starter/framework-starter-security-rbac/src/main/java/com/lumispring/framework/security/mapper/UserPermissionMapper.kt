@@ -39,4 +39,10 @@ interface UserPermissionMapper : BaseMapper<SysUserPermission> {
      */
     @Select("SELECT permission_id FROM sys_user_permission WHERE user_id = #{userId}")
     fun selectPermissionIdsByUserId(@Param("userId") userId: Long): List<Long>
+
+    /**
+     * 根据权限ID查询用户ID列表
+     */
+    @Select("SELECT user_id FROM sys_user_permission WHERE permission_id = #{permissionId}")
+    fun selectUserIdsByPermissionId(@Param("permissionId") permissionId: Long): List<Long>
 }

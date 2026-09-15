@@ -48,7 +48,7 @@ data class SysUser(
     var status: Int? = 1,
 
     /**
-     * 用户类型：1-普通用户，2-管理员
+     * 用户类型：1-普通用户，2-管理员（仅展示兼容，鉴权以 admin 角色为准）
      */
     @TableField("user_type")
     var userType: Int? = 1,
@@ -91,9 +91,4 @@ data class SysUser(
      * 是否启用
      */
     fun isEnabled(): Boolean = status == STATUS_ENABLED
-
-    /**
-     * 是否管理员
-     */
-    fun isAdmin(): Boolean = userType == TYPE_ADMIN
 }

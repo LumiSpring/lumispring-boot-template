@@ -54,4 +54,10 @@ interface UserRoleMapper : BaseMapper<SysUserRole> {
      */
     @Delete("DELETE FROM sys_user_role WHERE role_id = #{roleId}")
     fun deleteByRoleId(@Param("roleId") roleId: Long): Long
+
+    /**
+     * 根据角色ID查询用户ID列表
+     */
+    @Select("SELECT user_id FROM sys_user_role WHERE role_id = #{roleId}")
+    fun selectUserIdsByRoleId(@Param("roleId") roleId: Long): List<Long>
 }

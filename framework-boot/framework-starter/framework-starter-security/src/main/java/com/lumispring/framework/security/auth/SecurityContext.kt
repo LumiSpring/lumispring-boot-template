@@ -31,6 +31,8 @@ fun currentUsername(): String? = currentPrincipal()?.username
 
 fun currentRoles(): Set<String> = currentPrincipal()?.roles.orEmpty()
 
+fun currentPermissions(): Set<String> = currentPrincipal()?.permissions.orEmpty()
+
 fun isAdmin(): Boolean = currentPrincipal()?.admin == true
 
 /**

@@ -19,7 +19,7 @@ fun setCurrentUser(user: UserVO?) {
             id = userId,
             username = user.username,
             roles = user.roles.orEmpty().toSet(),
-            permissions = emptySet(),
+            permissions = user.permissions.orEmpty().toSet(),
             admin = user.isAdmin(),
             userDetails = user
         )
@@ -33,6 +33,8 @@ fun currentUsername(): String? = currentUser()?.username
 fun currentUserId(): Long? = currentUser()?.id
 
 fun currentUserRoles(): List<String>? = currentUser()?.roles
+
+fun currentPermissions(): List<String>? = currentUser()?.permissions
 
 fun currentToken(): String? = currentUser()?.token
 
@@ -53,6 +55,9 @@ object CurrentUserContext {
 
     @JvmStatic
     fun getCurrentUserRoles(): List<String>? = currentUserRoles()
+
+    @JvmStatic
+    fun getCurrentPermissions(): List<String>? = currentPermissions()
 
     @JvmStatic
     fun getCurrentToken(): String? = currentToken()

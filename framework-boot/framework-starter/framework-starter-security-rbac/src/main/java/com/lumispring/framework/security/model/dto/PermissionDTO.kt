@@ -15,7 +15,7 @@ data class PermissionDTO(
     val name: String,
 
     /**
-     * 权限编码：【模块:资源:名称】
+     * 权限编码：资源:动作，如 `user:create`
      */
     @field:NotBlank(message = "权限编码不能为空")
     @field:Size(max = 64, message = "权限编码长度不能超过64个字符")

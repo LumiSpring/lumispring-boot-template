@@ -7,9 +7,9 @@ import jakarta.validation.constraints.NotBlank
  */
 data class LoginDTO(
     /**
-     * 用户名
+     * 登录账号（用户名、邮箱或手机号）
      */
-    @field:NotBlank(message = "用户名不能为空")
+    @field:NotBlank(message = "账号不能为空")
     val username: String,
 
     /**

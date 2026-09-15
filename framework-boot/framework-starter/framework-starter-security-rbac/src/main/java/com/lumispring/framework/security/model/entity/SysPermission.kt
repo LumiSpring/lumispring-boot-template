@@ -18,7 +18,7 @@ data class SysPermission(
     var name: String? = null,
 
     /**
-     * 权限编码：【模块:资源:名称】
+     * 权限编码：资源:动作，如 user:create
      */
     var code: String? = null,
 

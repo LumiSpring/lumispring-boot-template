@@ -101,6 +101,11 @@ interface UserService : IService<SysUser> {
     fun updatePassword(passwordDTO: PasswordUpdateDTO)
 
     /**
+     * 管理员重置用户密码（无需旧密码，重置后该用户全部会话失效）
+     */
+    fun resetPassword(userId: Long, passwordDTO: PasswordResetDTO)
+
+    /**
      * 更新用户头像
      *
      * @param userId 用户ID
